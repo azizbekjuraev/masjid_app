@@ -27,8 +27,8 @@ const List<MapPage> _allPages = <MapPage>[
   // PlacemarkMapObjectPage(),
   // PolylineMapObjectPage(),
   // PolygonMapObjectPage(),
-  CircleMapObjectPage(),
-  // UserLayerPage(),
+  // CircleMapObjectPage(),
+  UserLayerPage(),
   // SuggestionsPage(),
   // SearchPage(),
   // ReverseSearchPage(),
@@ -46,25 +46,13 @@ class MainPage extends StatelessWidget {
             builder: (_) => Scaffold(
                 appBar: AppBar(title: Text(page.title)),
                 body:
-                    Container(padding: const EdgeInsets.all(8), child: page))));
+                    Container(padding: const EdgeInsets.all(0), child: page))));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('YandexMap examples')),
-        body: Column(children: <Widget>[
-          Expanded(
-              child: Container(
-                  padding: const EdgeInsets.all(8), child: const YandexMap())),
-          Expanded(
-              child: ListView.builder(
-            itemCount: _allPages.length,
-            itemBuilder: (_, int index) => ListTile(
-              title: Text(_allPages[index].title),
-              onTap: () => _pushPage(context, _allPages[index]),
-            ),
-          ))
-        ]));
+        appBar: AppBar(title: const Text('Masjid App')),
+        body: const UserLayerPage());
   }
 }

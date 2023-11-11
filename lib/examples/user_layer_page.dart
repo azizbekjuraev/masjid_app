@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 import 'package:masjid_app/examples/widgets/control_button.dart';
+import 'package:masjid_app/examples/search_page.dart';
 import 'package:masjid_app/examples/widgets/map_page.dart';
 
 class UserLayerPage extends MapPage {
@@ -31,15 +32,28 @@ class _UserLayerExampleState extends State<_UserLayerExample> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Expanded(
-              child: YandexMap(
+    // Set initial camera position to a specific region
+    final initialPosition =
+        Point(latitude: 41.311081, longitude: 69.240562); // Example coordinates
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          YandexMap(
             key: mapKey,
             onMapCreated: (YandexMapController yandexMapController) async {
               controller = yandexMapController;
+
+              // Set the initial camera position using moveCamera method
+              await controller.moveCamera(
+                CameraUpdate.newCameraPosition(
+                  CameraPosition(
+                    target: initialPosition,
+                    zoom: 6, // You can set the initial zoom level
+                  ),
+                ),
+                animation: const MapAnimation(),
+              );
             },
             onUserLocationAdded: (UserLocationView view) async {
               return view.copyWith(
@@ -52,68 +66,42 @@ class _UserLayerExampleState extends State<_UserLayerExample> {
                           image: BitmapDescriptor.fromAssetImage(
                               'lib/assets/arrow.png')))),
                   accuracyCircle: view.accuracyCircle
-                      .copyWith(fillColor: Colors.green.withOpacity(0.5)));
+                      .copyWith(fillColor: Colors.blue.withOpacity(0.5)));
             },
-          )),
-          const SizedBox(height: 20),
-          Expanded(
-              child: SingleChildScrollView(
-                  child: Column(children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                ControlButton(
-                    onPressed: () async {
-                      if (await locationPermissionNotGranted) {
-                        _showMessage(
-                            const Text('Location permission was NOT granted'));
-                        return;
-                      }
+          ),
+          Positioned(
+            bottom: 40.0,
+            right: 16.0,
+            child: FloatingActionButton(
+              tooltip: 'Your location',
+              onPressed: () async {
+                if (await locationPermissionNotGranted) {
+                  _showMessage(
+                      const Text('Location permission was NOT granted'));
+                  return;
+                }
+                // Your existing code for moving to the user's location
+                final mediaQuery = MediaQuery.of(context);
+                final height = mapKey.currentContext!.size!.height *
+                    mediaQuery.devicePixelRatio;
+                final width = mapKey.currentContext!.size!.width *
+                    mediaQuery.devicePixelRatio;
 
-                      final mediaQuery = MediaQuery.of(context);
-                      final height = mapKey.currentContext!.size!.height *
-                          mediaQuery.devicePixelRatio;
-                      final width = mapKey.currentContext!.size!.width *
-                          mediaQuery.devicePixelRatio;
-
-                      await controller.toggleUserLayer(
-                          visible: true,
-                          autoZoomEnabled: true,
-                          anchor: UserLocationAnchor(
-                              course: Offset(0.5 * width, 0.5 * height),
-                              normal: Offset(0.5 * width, 0.5 * height)));
-                    },
-                    title: 'Show user layer'),
-                ControlButton(
-                    onPressed: () async {
-                      if (await locationPermissionNotGranted) {
-                        _showMessage(
-                            const Text('Location permission was NOT granted'));
-                        return;
-                      }
-
-                      await controller.toggleUserLayer(visible: false);
-                    },
-                    title: 'Hide user layer')
-              ],
+                await controller.toggleUserLayer(
+                  visible: true,
+                  autoZoomEnabled: true,
+                  anchor: UserLocationAnchor(
+                    course: Offset(0.5 * width, 0.5 * height),
+                    normal: Offset(0.5 * width, 0.5 * height),
+                  ),
+                );
+              },
+              child: Icon(Icons.location_on),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                ControlButton(
-                    onPressed: () async {
-                      if (await locationPermissionNotGranted) {
-                        _showMessage(
-                            const Text('Location permission was NOT granted'));
-                        return;
-                      }
-
-                      print(await controller.getUserCameraPosition());
-                    },
-                    title: 'Get user camera position')
-              ],
-            )
-          ])))
-        ]);
+          ),
+          // Positioned(child: const SearchPage()),
+        ],
+      ),
+    );
   }
 }

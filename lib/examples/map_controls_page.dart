@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
-
 import 'package:masjid_app/examples/widgets/control_button.dart';
 import 'package:masjid_app/examples/widgets/map_page.dart';
 
@@ -23,7 +22,7 @@ class _MapControlsExampleState extends State<_MapControlsExample> {
   final List<MapObject> mapObjects = [];
 
   final MapObjectId targetMapObjectId = const MapObjectId('target_placemark');
-  static const Point _point = Point(latitude: 59.945933, longitude: 30.320045);
+  static const Point _point = Point(latitude: 41, longitude: 71.67);
   final animation =
       const MapAnimation(type: MapAnimationType.smooth, duration: 2.0);
 
@@ -246,8 +245,12 @@ class _MapControlsExampleState extends State<_MapControlsExample> {
                     ControlButton(
                         onPressed: () async {
                           const newBounds = BoundingBox(
-                            northEast: Point(latitude: 65.0, longitude: 40.0),
-                            southWest: Point(latitude: 60.0, longitude: 30.0),
+                            northEast: Point(
+                                latitude: 45.5905,
+                                longitude:
+                                    73.8066), // Approximate coordinates for the bounding box
+                            southWest:
+                                Point(latitude: 37.1919, longitude: 55.9977),
                           );
                           await controller.moveCamera(
                               CameraUpdate.newBounds(newBounds),
@@ -258,8 +261,12 @@ class _MapControlsExampleState extends State<_MapControlsExample> {
                         onPressed: () async {
                           final newGeometry =
                               Geometry.fromBoundingBox(const BoundingBox(
-                            northEast: Point(latitude: 65.0, longitude: 40.0),
-                            southWest: Point(latitude: 60.0, longitude: 30.0),
+                            northEast: Point(
+                                latitude: 45.5905,
+                                longitude:
+                                    73.8066), // Approximate coordinates for the bounding box
+                            southWest:
+                                Point(latitude: 37.1919, longitude: 55.9977),
                           ));
                           await controller.moveCamera(
                               CameraUpdate.newTiltAzimuthGeometry(newGeometry,
