@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
-import 'package:masjid_app/examples/widgets/control_button.dart';
-import 'package:masjid_app/examples/search_page.dart';
 import 'package:masjid_app/examples/widgets/map_page.dart';
 
 class UserLayerPage extends MapPage {
@@ -22,6 +20,7 @@ class _UserLayerExample extends StatefulWidget {
 class _UserLayerExampleState extends State<_UserLayerExample> {
   late YandexMapController controller;
   GlobalKey mapKey = GlobalKey();
+  TextEditingController queryController = TextEditingController();
 
   Future<bool> get locationPermissionNotGranted async =>
       !(await Permission.location.request().isGranted);
@@ -33,8 +32,11 @@ class _UserLayerExampleState extends State<_UserLayerExample> {
   @override
   Widget build(BuildContext context) {
     // Set initial camera position to a specific region
-    final initialPosition =
+    const initialPosition =
         Point(latitude: 41.311081, longitude: 69.240562); // Example coordinates
+
+    final animation =
+        const MapAnimation(type: MapAnimationType.smooth, duration: 2.0);
 
     return Scaffold(
       body: Stack(

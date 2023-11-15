@@ -56,10 +56,12 @@ class _SearchExampleState extends State<_SearchExample> {
 
     final resultWithSession = YandexSearch.searchByText(
       searchText: query,
-      geometry: Geometry.fromBoundingBox(const BoundingBox(
-        southWest: Point(latitude: 37.1841, longitude: 55.8652),
-        northEast: Point(latitude: 45.5908, longitude: 73.0551),
-      )),
+      geometry: Geometry.fromBoundingBox(
+        BoundingBox(
+          southWest: Point(latitude: 40.9727, longitude: 71.0419),
+          northEast: Point(latitude: 41.0592, longitude: 71.1531),
+        ),
+      ),
       searchOptions: const SearchOptions(
         searchType: SearchType.geo,
         geometry: false,
@@ -170,7 +172,6 @@ class _SessionState extends State<_SessionPage> {
 
       list.add(Container(height: 20));
     }
-
     return list;
   }
 

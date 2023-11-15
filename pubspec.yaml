@@ -37,6 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   yandex_mapkit: ^3.3.3
   permission_handler: ^11.0.1
+  map_launcher: ^3.0.1
 
 dev_dependencies:
   flutter_test:
@@ -54,11 +55,16 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  assets:
+    - assets/user.png
+    - assets/arrow.png
+    - assets/icons/place.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:
