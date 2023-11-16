@@ -23,6 +23,10 @@ if (flutterVersionName == null) {
 }
 
 android {
+    lintOptions {
+        disable 'Deprecated'
+    }
+
     namespace "com.example.masjid_app"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion

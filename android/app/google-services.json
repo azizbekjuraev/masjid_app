@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "723395651050",
+    "project_id": "masjid-app-d3e18",
+    "storage_bucket": "masjid-app-d3e18.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:723395651050:android:d796cc0af79fd4d7777e93",
+        "android_client_info": {
+          "package_name": "com.example.masjid_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMqDhTdDvmUp3odTfakgOmEKATClnhp2w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

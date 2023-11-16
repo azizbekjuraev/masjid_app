@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/link.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:map_launcher/map_launcher.dart';
 import 'package:masjid_app/examples/map_point.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -201,16 +203,50 @@ class _ModalBodyView extends StatelessWidget {
 
   final MapPoint point;
 
-  Future<void> _launchInApp(Uri url) async {
-    if (!await launchUrl(url, mode: LaunchMode.inAppBrowserView)) {
-      throw Exception('Could not launch $url');
+  Future<void> _openMapsSheet(BuildContext context) async {
+    try {
+      final coords = Coords(point.latitude, point.longitude);
+      final title = point.name;
+      final availableMaps = await MapLauncher.installedMaps;
+
+      showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return SafeArea(
+            child: SingleChildScrollView(
+              child: Container(
+                child: Wrap(
+                  children: <Widget>[
+                    for (var map in availableMaps)
+                      ListTile(
+                        onTap: () => map.showMarker(
+                          coords: coords,
+                          title: title,
+                        ),
+                        title: Text(map.mapName),
+                        leading: SvgPicture.asset(
+                          map.icon,
+                          height: 30,
+                          width: 30,
+                        ),
+                      ),
+                  ],
+                ),
+                height: 150,
+              ),
+            ),
+          );
+        },
+      );
+    } catch (e) {
+      print(e);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 40),
+      padding: const EdgeInsets.symmetric(vertical: 30),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -220,16 +256,8 @@ class _ModalBodyView extends StatelessWidget {
               Text(point.name, style: const TextStyle(fontSize: 20)),
               TextButton(
                 onPressed: () async {
-                  // Handle the onPressed event for the TextButton
-                  print('TextButton pressed!');
-                  await _launchInApp(Uri(
-                    scheme: 'https',
-                    host: 'maps.google.com',
-                    path: '',
-                    queryParameters: {
-                      'daddr': '${point.latitude},${point.longitude}',
-                    },
-                  ));
+                  // Show the maps sheet when the button is pressed
+                  await _openMapsSheet(context);
                 },
                 child: Icon(Icons.location_on_outlined),
               ),
