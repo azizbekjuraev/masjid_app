@@ -6,7 +6,6 @@ import 'package:masjid_app/examples/map_point.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -18,6 +17,10 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   late final YandexMapController _mapController;
   GlobalKey mapKey = GlobalKey();
+
+  var collection = FirebaseFirestore.instance.collection('masjids');
+  late List<MapPoint> items = [];
+  bool isLoaded = false;
 
   var _mapZoom = 0.0;
   CameraPosition? _userLocation;
@@ -122,7 +125,7 @@ class _MapScreenState extends State<MapScreen> {
                   print('Moved camera to user location: $_userLocation');
                 }
               },
-              child: Icon(Icons.location_on),
+              child: Icon(Icons.my_location_rounded),
             ),
           ),
         ],
@@ -146,35 +149,38 @@ class _MapScreenState extends State<MapScreen> {
         );
       });
     }
+
+    var data = await collection.get();
+    List<MapPoint> mapPoints = _getMapPoints(data.docs);
+    setState(() {
+      items = mapPoints;
+      isLoaded = true;
+    });
   }
 
-  List<MapPoint> _getMapPoints() {
-    return const [
-      MapPoint(name: 'Москва', latitude: 55.755864, longitude: 37.617698),
-      MapPoint(name: 'Лондон', latitude: 51.507351, longitude: -0.127696),
-      MapPoint(name: 'Рим', latitude: 41.887064, longitude: 12.504809),
-      MapPoint(name: 'Париж', latitude: 48.856663, longitude: 2.351556),
-      MapPoint(
-          name: 'Мечеть Мулла бозор Охун',
-          latitude: 41.01136179919554,
-          longitude: 71.67607470547419),
-      MapPoint(
-          name: 'Минг Чинор масжиди',
-          latitude: 41.01327745053201,
-          longitude: 71.62926142460591),
-      MapPoint(
-          name: 'Yahyoxon Tõra Masjidi',
-          latitude: 40.99678905156766,
-          longitude: 71.66002297170553),
-      MapPoint(
-          name: 'Мечеть Абдулкадира Кари',
-          latitude: 40.99913330845567,
-          longitude: 71.6538426935586),
-    ];
+  List<MapPoint> _getMapPoints(List<QueryDocumentSnapshot> documents) {
+    return documents.map((DocumentSnapshot document) {
+      final data = document.data() as Map<String, dynamic>;
+      final name = data['name'] ?? '';
+      final coords = data['coords'];
+
+      // Check if 'coords' is a GeoPoint
+      if (coords is GeoPoint) {
+        double latitude = coords.latitude;
+        double longitude = coords.longitude;
+        return MapPoint(name: name, latitude: latitude, longitude: longitude);
+      } else {
+        // Handle the case where coordinates are not in GeoPoint format
+        return MapPoint(
+            name: name,
+            latitude: 0.0,
+            longitude: 0.0); // Provide default values or handle accordingly
+      }
+    }).toList();
   }
 
   List<PlacemarkMapObject> _getPlacemarkObjects(BuildContext context) {
-    return _getMapPoints().map((point) {
+    return items.map((point) {
       return PlacemarkMapObject(
         mapId: MapObjectId('MapObject $point'),
         point: Point(latitude: point.latitude, longitude: point.longitude),
@@ -208,7 +214,7 @@ class _ModalBodyView extends StatelessWidget {
       final coords = Coords(point.latitude, point.longitude);
       final title = point.name;
       final availableMaps = await MapLauncher.installedMaps;
-
+      print(context);
       showModalBottomSheet(
         context: context,
         builder: (BuildContext context) {
