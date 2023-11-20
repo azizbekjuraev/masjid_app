@@ -3,12 +3,15 @@ import 'package:equatable/equatable.dart';
 /// Модель точки на карте
 class MapPoint extends Equatable {
   const MapPoint({
+    required this.documentId,
     required this.name,
     required this.latitude,
     required this.longitude,
   });
 
   /// Название населенного пункта
+  final String documentId;
+
   final String name;
 
   /// Широта

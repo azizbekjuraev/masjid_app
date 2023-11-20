@@ -7,7 +7,6 @@ import 'package:masjid_app/examples/search_page.dart';
 import 'package:masjid_app/examples/launch_app.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:masjid_app/firebase_options.dart';
-import 'package:masjid_app/examples/masjids_list.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
