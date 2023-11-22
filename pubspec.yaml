@@ -43,6 +43,7 @@ dependencies:
   firebase_core: ^2.22.0
   cloud_firestore: ^4.13.1
   intl: ^0.17.0
+  csv: ^5.1.1
 
 dev_dependencies:
   flutter_test:
@@ -63,7 +64,12 @@ flutter:
   assets:
     - assets/user.png
     - assets/arrow.png
+    - assets/route_start.png
     - assets/icons/place.png
+    - assets/mosque.png
+    - assets/islamic.png
+    - assets/Masjids.csv
+
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

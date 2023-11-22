@@ -6,6 +6,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:csv/csv.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'dart:async' show Future;
 
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key}) : super(key: key);
@@ -85,8 +88,6 @@ class _MapScreenState extends State<MapScreen> {
       final name = data['name'] ?? '';
       final coords = data['coords'];
 
-      print(docId);
-
       if (coords is GeoPoint) {
         double latitude = coords.latitude;
         double longitude = coords.longitude;
@@ -111,12 +112,14 @@ class _MapScreenState extends State<MapScreen> {
         icon: PlacemarkIcon.single(
           PlacemarkIconStyle(
             image: BitmapDescriptor.fromAssetImage(
-              'assets/icons/place.png',
+              'assets/mosque.png',
             ),
-            scale: 1,
+            scale: 0.25,
           ),
         ),
         onTap: (_, __) => showModalBottomSheet(
+          enableDrag: true,
+          showDragHandle: true,
           context: context,
           builder: (context) => _ModalBodyView(
             point: point,
@@ -133,8 +136,6 @@ class _MapScreenState extends State<MapScreen> {
       DocumentReference masjidRef = prayerTime['masjid'];
       // Extract the document ID from the reference
       String masjidId = masjidRef.id;
-
-      print("Masjid ID: $masjidId");
 
       // Map the document ID from the 'masjid' field
       String prayerTimeMasjidId = masjidRef.id;
@@ -159,7 +160,7 @@ class _MapScreenState extends State<MapScreen> {
             })
         .toList();
 
-    print(formattedPrayerTimes);
+    // print(formattedPrayerTimes);
     return formattedPrayerTimes;
   }
 
@@ -173,6 +174,94 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  Future<void> uploadToFirestore() async {
+    final CollectionReference masjids =
+        FirebaseFirestore.instance.collection('masjids');
+    final myData = await rootBundle.loadString("assets/Masjids.csv");
+    List<List<dynamic>> csvTable =
+        CsvToListConverter(eol: '\n').convert(myData);
+    List<List<dynamic>> data = csvTable;
+
+    for (var i = 0; i < data.length; i++) {
+      var latString = data[i][1]?.toString();
+      var longString = data[i][2]?.toString();
+
+      // Remove degree symbol and direction indicators
+      latString = latString?.replaceAll('° N', '');
+      longString = longString?.replaceAll('° E', '');
+
+      var lat = double.tryParse(latString!) ?? 0.0;
+      var long = double.tryParse(longString!) ?? 0.0;
+
+      if (lat != null && long != null) {
+        var record = {
+          'name': data[i][0],
+          'coords': GeoPoint(lat, long),
+        };
+
+        // Check if the document with the same name and coordinates already exists
+        var existingDocs = await masjids
+            .where('name', isEqualTo: data[i][0])
+            .where('coords', isEqualTo: GeoPoint(lat, long))
+            .get();
+
+        if (existingDocs.docs.isEmpty) {
+          // Document doesn't exist, add it to Firestore
+          await masjids.add(record);
+          print('Record added to Firestore');
+        } else {
+          print('Record already exists in Firestore');
+        }
+      } else {
+        print('Invalid latitude or longitude for record: $i');
+      }
+    }
+  }
+
+  Future<void> uploadPrayerTimesToFirestore() async {
+    final masjids = FirebaseFirestore.instance.collection('masjids');
+    final masjidDocuments = await masjids.get();
+
+    for (var masjidDocument in masjidDocuments.docs) {
+      final masjidRef = masjidDocument.reference;
+      final masjidId = masjidRef.id;
+
+      // Generate timestamps for each prayer time
+      final bomdodTime = Timestamp.fromDate(DateTime(2023, 11, 18, 5, 45, 0));
+      final bomdodTakbirTime =
+          Timestamp.fromDate(DateTime(2023, 11, 18, 5, 30, 0));
+      final peshinTime = Timestamp.fromDate(DateTime(2023, 11, 18, 13, 14, 57));
+      final peshinTakbirTime =
+          Timestamp.fromDate(DateTime(2023, 11, 18, 13, 22, 29));
+      final asrTime = Timestamp.fromDate(DateTime(2023, 11, 18, 15, 47, 24));
+      final asrTakbirTime =
+          Timestamp.fromDate(DateTime(2023, 11, 18, 15, 46, 31));
+      final shomTime = Timestamp.fromDate(DateTime(2023, 11, 18, 17, 25, 44));
+      final shomTakbirTime =
+          Timestamp.fromDate(DateTime(2023, 11, 18, 17, 53, 4));
+      final xuftonTime = Timestamp.fromDate(DateTime(2023, 11, 18, 18, 43, 44));
+      final xuftonTakbirTime =
+          Timestamp.fromDate(DateTime(2023, 11, 18, 18, 50, 6));
+      final createdAt = Timestamp.fromDate(DateTime(2023, 11, 18, 1, 16, 15));
+
+      // Create a prayer time document
+      await FirebaseFirestore.instance.collection('prayer_time').add({
+        'masjid': masjidRef, // Reference to the masjid document
+        'bomdod': bomdodTime,
+        'bomdod_takbir': bomdodTakbirTime,
+        'peshin': peshinTime,
+        'peshin_takbir': peshinTakbirTime,
+        'asr': asrTime,
+        'asr_takbir': asrTakbirTime,
+        'shom': shomTime,
+        'shom_takbir': shomTakbirTime,
+        'xufton': xuftonTime,
+        'xufton_takbir': xuftonTakbirTime,
+        'created_at': createdAt,
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -182,15 +271,13 @@ class _MapScreenState extends State<MapScreen> {
             onMapCreated: (controller) async {
               _mapController = controller;
               await _initLocationLayer();
+              // await uploadToFirestore();
+              // await uploadPrayerTimesToFirestore();
             },
             onCameraPositionChanged: (cameraPosition, _, __) {
               setState(() {
                 _mapZoom = cameraPosition.zoom;
               });
-            },
-            onMapTap: (Point point) async {
-              print("Map tapped at $point");
-              await _mapController.deselectGeoObject();
             },
             mapObjects: _getPlacemarkObjects(context),
             onUserLocationAdded: (view) async {
@@ -206,8 +293,10 @@ class _MapScreenState extends State<MapScreen> {
               return view.copyWith(
                   pin: view.pin.copyWith(
                       icon: PlacemarkIcon.single(PlacemarkIconStyle(
-                          image: BitmapDescriptor.fromAssetImage(
-                              'assets/user.png')))),
+                    image:
+                        BitmapDescriptor.fromAssetImage('assets/islamic.png'),
+                    scale: 0.15,
+                  ))),
                   arrow: view.arrow.copyWith(
                       icon: PlacemarkIcon.single(PlacemarkIconStyle(
                           image: BitmapDescriptor.fromAssetImage(
@@ -225,8 +314,7 @@ class _MapScreenState extends State<MapScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(0)),
               onPressed: () async {
-                await _mapController.moveCamera(CameraUpdate.zoomIn(),
-                    animation: animation);
+                await _mapController.moveCamera(CameraUpdate.zoomIn());
               },
               child: Icon(Icons.add),
             ),
@@ -240,8 +328,7 @@ class _MapScreenState extends State<MapScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(0)),
               onPressed: () async {
-                await _mapController.moveCamera(CameraUpdate.zoomOut(),
-                    animation: animation);
+                await _mapController.moveCamera(CameraUpdate.zoomOut());
               },
               child: Icon(Icons.remove),
             ),
@@ -274,7 +361,7 @@ class _MapScreenState extends State<MapScreen> {
 }
 
 class _ModalBodyView extends StatelessWidget {
-  const _ModalBodyView({required this.point, required this.prayerTimes});
+  _ModalBodyView({required this.point, required this.prayerTimes});
 
   final MapPoint point;
   final List<Map<String, String>> prayerTimes;
@@ -299,172 +386,171 @@ class _ModalBodyView extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-
           // Display formatted prayer times
           for (var time in prayerTimes)
-            Container(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Table(
-                      // textDirection: TextDirection.rtl,
-                      defaultVerticalAlignment:
-                          TableCellVerticalAlignment.bottom,
-                      border: TableBorder.all(width: 1.0, color: Colors.blue),
-                      children: [
-                        TableRow(
-                          children: [
-                            TableCell(
-                              child: Container(
-                                color: Colors.lightBlueAccent,
-                                child: Center(
-                                  child: Text(
-                                    'Namoz vaqtlari',
-                                    textScaleFactor: 2,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            TableCell(
-                              child: Container(
-                                color: Colors.lightBlueAccent,
-                                child: Center(
-                                  child: Text(
-                                    'Takbir vaqtlari',
-                                    textScaleFactor: 2,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        TableRow(
-                          children: [
-                            TableCell(
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Table(
+                    defaultVerticalAlignment: TableCellVerticalAlignment.bottom,
+                    border: TableBorder.all(width: 1.0, color: Colors.blue),
+                    children: [
+                      TableRow(
+                        children: [
+                          TableCell(
+                            child: Container(
+                              color: Colors.lightBlueAccent,
                               child: Center(
                                 child: Text(
-                                  'Bomdod - ${time['bomdod']}',
-                                  textScaleFactor: 1.3,
+                                  'Namoz vaqtlari',
+                                  style: myTextStyle,
                                 ),
                               ),
                             ),
-                            TableCell(
-                              child: Center(
-                                child: Text(
-                                  'Bomdod Takbir - ${time['bomdod_takbir']}',
-                                  textScaleFactor: 1.3,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        TableRow(
-                          children: [
-                            Center(
-                              child: TableCell(
-                                child: Text(
-                                  "Peshin - ${time['peshin']}",
-                                  textScaleFactor: 1.3,
-                                ),
-                              ),
-                            ),
-                            Center(
-                              child: TableCell(
-                                child: Text(
-                                  "Peshin Takbiri - ${time['peshin_takbir']}",
-                                  textScaleFactor: 1.3,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        TableRow(
-                          children: [
-                            Center(
-                              child: TableCell(
-                                child: Text(
-                                  "Asr - ${time['asr']}",
-                                  textScaleFactor: 1.3,
-                                ),
-                              ),
-                            ),
-                            Center(
-                              child: TableCell(
-                                child: Text(
-                                  "Asr Takbiri - ${time['asr_takbir']}",
-                                  textScaleFactor: 1.3,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        TableRow(
-                          children: [
-                            Center(
-                              child: TableCell(
-                                child: Text(
-                                  "Shom - ${time['shom']}",
-                                  textScaleFactor: 1.3,
-                                ),
-                              ),
-                            ),
-                            Center(
-                              child: TableCell(
-                                child: Text(
-                                  "Shom Takbir - ${time['shom_takbir']}",
-                                  textScaleFactor: 1.3,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        TableRow(children: [
-                          Center(
-                            child: TableCell(
-                                child: Text(
-                              "Xufton - ${time['xufton']}",
-                              textScaleFactor: 1.3,
-                            )),
                           ),
-                          Center(
-                            child: TableCell(
+                          TableCell(
+                            child: Container(
+                              color: Colors.lightBlueAccent,
+                              child: Center(
                                 child: Text(
-                              "Xufton Takbiri - ${time['xufton_takbir']}",
-                              textScaleFactor: 1.3,
-                            )),
-                          )
-                        ])
+                                  'Takbir vaqtlari',
+                                  style: myTextStyle,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      TableRow(
+                        children: [
+                          TableCell(
+                            child: Center(
+                              child: Text(
+                                'Bomdod - ${time['bomdod']}',
+                                style: myTextStyle,
+                              ),
+                            ),
+                          ),
+                          TableCell(
+                            child: Center(
+                              child: Text(
+                                'Bomdod Takbir - ${time['bomdod_takbir']}',
+                                style: myTextStyle,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      TableRow(
+                        children: [
+                          TableCell(
+                            child: Center(
+                              child: Text(
+                                "Peshin - ${time['peshin']}",
+                                style: myTextStyle,
+                              ),
+                            ),
+                          ),
+                          TableCell(
+                            child: Center(
+                              child: Text(
+                                "Peshin Takbiri - ${time['peshin_takbir']}",
+                                style: myTextStyle,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      TableRow(
+                        children: [
+                          TableCell(
+                            child: Center(
+                              child: Text(
+                                "Asr - ${time['asr']}",
+                                style: myTextStyle,
+                              ),
+                            ),
+                          ),
+                          TableCell(
+                            child: Center(
+                              child: Text(
+                                "Asr Takbiri - ${time['asr_takbir']}",
+                                style: myTextStyle,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      TableRow(
+                        children: [
+                          TableCell(
+                            child: Center(
+                              child: Text(
+                                "Shom - ${time['shom']}",
+                                style: myTextStyle,
+                              ),
+                            ),
+                          ),
+                          TableCell(
+                            child: Center(
+                              child: Text(
+                                "Shom Takbir - ${time['shom_takbir']}",
+                                style: myTextStyle,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      TableRow(
+                        children: [
+                          TableCell(
+                            child: Center(
+                              child: Text(
+                                "Xufton - ${time['xufton']}",
+                                style: myTextStyle,
+                              ),
+                            ),
+                          ),
+                          TableCell(
+                            child: Center(
+                              child: Text(
+                                "Xufton Takbiri - ${time['xufton_takbir']}",
+                                style: myTextStyle,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.history),
+                        Text(
+                          'Yangilangan sana: ${time['created_at']}',
+                          style: const TextStyle(fontSize: 20),
+                        ),
                       ],
                     ),
                   ),
-                  Container(
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.history),
-                            Text(
-                              'Yangilandi: ${time['created_at']}',
-                              style: TextStyle(fontSize: 20),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              ),
+                ),
+              ],
             ),
         ],
       ),
     );
   }
 
-  Future<void> _openMapsSheet(BuildContext context) async {
+  TextStyle myTextStyle = const TextStyle(fontSize: 17);
+
+  Future<void> _openMapsSheet(context) async {
     try {
       final coords = Coords(point.latitude, point.longitude);
       final title = point.name;
@@ -475,7 +561,8 @@ class _ModalBodyView extends StatelessWidget {
         builder: (BuildContext context) {
           return SafeArea(
             child: SingleChildScrollView(
-              child: Container(
+              child: SizedBox(
+                height: 150,
                 child: Wrap(
                   children: <Widget>[
                     for (var map in availableMaps)
@@ -493,7 +580,6 @@ class _ModalBodyView extends StatelessWidget {
                       ),
                   ],
                 ),
-                height: 150,
               ),
             ),
           );

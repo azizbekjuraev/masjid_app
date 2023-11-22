@@ -11,7 +11,9 @@ import 'package:masjid_app/firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MaterialApp(home: MainPage()));
+  runApp(const MaterialApp(
+    home: MainPage(),
+  ));
 }
 
 class MainPage extends StatelessWidget {
@@ -20,6 +22,10 @@ class MainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('Masjid App')), body: MapScreen());
+      appBar: AppBar(
+        title: const Text('Masjid App'),
+      ),
+      body: MapScreen(),
+    );
   }
 }
