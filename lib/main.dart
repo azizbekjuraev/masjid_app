@@ -7,17 +7,20 @@ import 'package:masjid_app/examples/search_page.dart';
 import 'package:masjid_app/examples/launch_app.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:masjid_app/firebase_options.dart';
+import 'package:masjid_app/examples/widgets/drower_widget.dart';
+import 'package:masjid_app/examples/views/login_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MaterialApp(
-    home: MainPage(),
-  ));
+  runApp(MaterialApp(home: const MainPage(), routes: {
+    './login/': (context) => const LoginView(),
+    './main/': (context) => const MainPage(),
+  }));
 }
 
 class MainPage extends StatelessWidget {
-  const MainPage({Key? key}) : super(key: key);
+  const MainPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +28,8 @@ class MainPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Masjid App'),
       ),
-      body: MapScreen(),
+      body: const MapScreen(),
+      drawer: DrowerWidgets().appBarDrow(context),
     );
   }
 }

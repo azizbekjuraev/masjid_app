@@ -12,7 +12,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'dart:async' show Future;
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({Key? key}) : super(key: key);
+  const MapScreen({super.key});
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -28,7 +28,7 @@ class _MapScreenState extends State<MapScreen> {
   late List<Map<String, dynamic>> prayerItems = [];
   bool isLoaded = false;
 
-  var _mapZoom = 0.0;
+  // var _mapZoom = 0.0;
   CameraPosition? _userLocation;
 
   final animation =
@@ -68,8 +68,6 @@ class _MapScreenState extends State<MapScreen> {
         prayerItems = prayerTimes;
         isLoaded = true;
       });
-
-      // _updatePlacemarkObjects();
     } catch (e) {
       print('Error fetching data: $e');
     }
@@ -133,13 +131,8 @@ class _MapScreenState extends State<MapScreen> {
 
   List<Map<String, String>> _getPrayerTimesForLocation(MapPoint point) {
     var prayerTimes = prayerItems.where((prayerTime) {
-      // Assuming 'masjid' is a reference to a Firestore document
       DocumentReference masjidRef = prayerTime['masjid'];
-
-      // Map the document ID from the 'masjid' field
       String prayerTimeMasjidId = masjidRef.id;
-
-      // Now, you can compare the mapped masjidId with point.documentId
       return prayerTimeMasjidId == point.documentId;
     }).toList();
 
@@ -158,8 +151,6 @@ class _MapScreenState extends State<MapScreen> {
               'created_at': _formatFullTimestamp(prayerTime['created_at']),
             })
         .toList();
-
-    // print(formattedPrayerTimes);
     return formattedPrayerTimes;
   }
 
@@ -194,7 +185,6 @@ class _MapScreenState extends State<MapScreen> {
       var latString = data[i][1]?.toString();
       var longString = data[i][2]?.toString();
 
-      // Remove degree symbol and direction indicators
       latString = latString?.replaceAll('° N', '');
       longString = longString?.replaceAll('° E', '');
 
@@ -206,14 +196,12 @@ class _MapScreenState extends State<MapScreen> {
         'coords': GeoPoint(lat, long),
       };
 
-      // Check if the document with the same name and coordinates already exists
       var existingDocs = await masjids
           .where('name', isEqualTo: data[i][0])
           .where('coords', isEqualTo: GeoPoint(lat, long))
           .get();
 
       if (existingDocs.docs.isEmpty) {
-        // Document doesn't exist, add it to Firestore
         await masjids.add(record);
         print('Record added to Firestore');
       } else {
@@ -229,7 +217,14 @@ class _MapScreenState extends State<MapScreen> {
     for (var masjidDocument in masjidDocuments.docs) {
       final masjidRef = masjidDocument.reference;
 
-      // Generate timestamps for each prayer time
+      final existingPrayerTimes = await FirebaseFirestore.instance
+          .collection('prayer_time')
+          .where('masjid', isEqualTo: masjidRef)
+          .get();
+
+      if (existingPrayerTimes.docs.isNotEmpty) {
+        continue;
+      }
       final bomdodTime = Timestamp.fromDate(DateTime(2023, 11, 18, 5, 45, 0));
       final bomdodTakbirTime =
           Timestamp.fromDate(DateTime(2023, 11, 18, 5, 30, 0));
@@ -277,11 +272,11 @@ class _MapScreenState extends State<MapScreen> {
               // await uploadToFirestore();
               // await uploadPrayerTimesToFirestore();
             },
-            onCameraPositionChanged: (cameraPosition, _, __) {
-              setState(() {
-                _mapZoom = cameraPosition.zoom;
-              });
-            },
+            // onCameraPositionChanged: (cameraPosition, _, __) {
+            //   setState(() {
+            //     _mapZoom = cameraPosition.zoom;
+            //   });
+            // },
             mapObjects: _getPlacemarkObjects(context),
             onUserLocationAdded: (view) async {
               _userLocation = await _mapController.getUserCameraPosition();
@@ -350,7 +345,6 @@ class _MapScreenState extends State<MapScreen> {
                       ),
                       animation: const MapAnimation(
                           type: MapAnimationType.linear, duration: 0.6));
-                  print('Moved camera to user location: $_userLocation');
                 }
               },
               child: const Icon(Icons.my_location_rounded),
@@ -363,7 +357,7 @@ class _MapScreenState extends State<MapScreen> {
 }
 
 class _ModalBodyView extends StatefulWidget {
-  _ModalBodyView({required this.point, required this.prayerTimes});
+  const _ModalBodyView({required this.point, required this.prayerTimes});
   final MapPoint point;
   final List<Map<String, String>> prayerTimes;
 
@@ -374,126 +368,129 @@ class _ModalBodyView extends StatefulWidget {
 class _ModalBodyViewState extends State<_ModalBodyView> {
   @override
   Widget build(BuildContext context) {
-    // Get the screen size
     double screenWidth = MediaQuery.of(context).size.width;
-
-    // Calculate the dynamic font size based on the screen width
     double dynamicFontSize = screenWidth * 0.04;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(widget.point.name,
-                  style: TextStyle(fontSize: dynamicFontSize)),
-              TextButton(
-                onPressed: () async {
-                  await _openMapsSheet(context);
-                },
-                child: const Icon(Icons.location_on_outlined),
-              ),
-            ],
-          ),
-          const SizedBox(height: 5),
-          for (var time in widget.prayerTimes)
-            Column(
+      child: InteractiveViewer(
+        minScale: 1,
+        maxScale: 3,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  'Azon Vaqtlari',
-                  style: TextStyle(color: Colors.redAccent),
-                ),
-                const SizedBox(height: 5),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0, vertical: 1.0),
-                  child: Table(
-                    defaultVerticalAlignment: TableCellVerticalAlignment.bottom,
-                    border: TableBorder.all(width: 0, color: Colors.black),
-                    children: [
-                      TableRow(
-                        children: [
-                          for (var time in widget.prayerTimes)
-                            ..._buildAzonPrayerTimeCells(time, myTextStyle),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 5),
-                const Text(
-                  'Takbir Vaqtlari',
-                  style: TextStyle(color: Colors.blueAccent),
-                ),
-                const SizedBox(height: 5),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0, vertical: 1.0),
-                  child: Table(
-                    defaultVerticalAlignment: TableCellVerticalAlignment.bottom,
-                    border: TableBorder.all(width: 0, color: Colors.black),
-                    children: [
-                      TableRow(
-                        children: [
-                          for (var time in widget.prayerTimes)
-                            ..._buildTakbirPrayerTimeCells(time, myTextStyle),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 5),
-                //Yangilash
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EditPrayerTimesScreen(
-                                point: widget.point,
-                                prayerTimes: widget.prayerTimes,
-                              ),
-                            ),
-                          );
-                          //
-                        },
-                        icon: const Icon(
-                          Icons.edit_outlined,
-                          size: 15,
-                        ),
-                        label: const Text('Yangilash'),
-                      ),
-                      Column(
-                        children: [
-                          const Text(
-                            'Yangilangan sana:',
-                            style: TextStyle(color: Colors.deepPurple),
-                          ),
-                          Text(
-                            '${time['created_at']}',
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
+                Text(widget.point.name,
+                    style: TextStyle(fontSize: dynamicFontSize)),
+                TextButton(
+                  onPressed: () async {
+                    await _openMapsSheet(context);
+                  },
+                  child: const Icon(Icons.location_on_outlined),
                 ),
               ],
             ),
-        ],
+            const SizedBox(height: 5),
+            for (var time in widget.prayerTimes)
+              Column(
+                children: [
+                  const Text(
+                    'Azon Vaqtlari',
+                    style: TextStyle(color: Colors.redAccent),
+                  ),
+                  const SizedBox(height: 5),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10.0, vertical: 1.0),
+                    child: Table(
+                      defaultVerticalAlignment:
+                          TableCellVerticalAlignment.bottom,
+                      border: TableBorder.all(width: 0, color: Colors.black),
+                      children: [
+                        TableRow(
+                          children: [
+                            for (var time in widget.prayerTimes)
+                              ..._buildAzonPrayerTimeCells(time, myTextStyle),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+
+                  const Text(
+                    'Takbir Vaqtlari',
+                    style: TextStyle(color: Colors.blueAccent),
+                  ),
+                  const SizedBox(height: 5),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10.0, vertical: 1.0),
+                    child: Table(
+                      defaultVerticalAlignment:
+                          TableCellVerticalAlignment.bottom,
+                      border: TableBorder.all(width: 0, color: Colors.black),
+                      children: [
+                        TableRow(
+                          children: [
+                            for (var time in widget.prayerTimes)
+                              ..._buildTakbirPrayerTimeCells(time, myTextStyle),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  //Yangilash
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditPrayerTimesScreen(
+                                  point: widget.point,
+                                  prayerTimes: widget.prayerTimes,
+                                ),
+                              ),
+                            );
+                            //
+                          },
+                          icon: const Icon(
+                            Icons.edit_outlined,
+                            size: 15,
+                          ),
+                          label: const Text('Yangilash'),
+                        ),
+                        Column(
+                          children: [
+                            const Text(
+                              'Yangilangan sana:',
+                              style: TextStyle(color: Colors.deepPurple),
+                            ),
+                            Text(
+                              '${time['created_at']}',
+                              style: const TextStyle(fontSize: 15),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
       ),
     );
   }
 
-// Function to build cells for each prayer time
   List<Widget> _buildAzonPrayerTimeCells(
       Map<String, dynamic> time, TextStyle myTextStyle) {
     return [
@@ -503,7 +500,6 @@ class _ModalBodyViewState extends State<_ModalBodyView> {
   }
 
   String removeSuffix(String prayer) {
-    // Assuming the suffix is always "_Takbir"
     return prayer.replaceAll('_Takbir', '');
   }
 
@@ -529,7 +525,6 @@ class _ModalBodyViewState extends State<_ModalBodyView> {
     ];
   }
 
-// Function to build each cell with AnalogClock
   List<Widget> _buildTableCell(
       String label, String time, TextStyle myTextStyle) {
     return [
@@ -545,7 +540,6 @@ class _ModalBodyViewState extends State<_ModalBodyView> {
     ];
   }
 
-// Function to build AnalogClock
   Widget _buildAnalogClock(String time) {
     String dateTimeString = "2023-01-01 $time";
 
@@ -559,7 +553,8 @@ class _ModalBodyViewState extends State<_ModalBodyView> {
       minuteHandColor: Colors.black,
       numberColor: Colors.black,
       showNumbers: true,
-      textScaleFactor: 2,
+      showSecondHand: false,
+      textScaleFactor: 2.4,
       showTicks: true,
       showDigitalClock: false,
       showAllNumbers: true,
@@ -614,7 +609,8 @@ class EditPrayerTimesScreen extends StatefulWidget {
   final MapPoint point;
   final List<Map<String, String>> prayerTimes;
 
-  EditPrayerTimesScreen({required this.point, required this.prayerTimes});
+  const EditPrayerTimesScreen(
+      {super.key, required this.point, required this.prayerTimes});
 
   @override
   _EditPrayerTimesScreenState createState() => _EditPrayerTimesScreenState();
@@ -668,7 +664,6 @@ class _EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Add UI elements for each timestamp field with corresponding controllers
             _buildRow('Bomdod', 'Bomdod Takbir', bomdodController,
                 bomdodTakbirController),
             _buildRow('Peshin', 'Peshin Takbir', peshinController,
@@ -678,12 +673,12 @@ class _EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
                 'Shom', 'Shom Takbir', shomController, shomTakbirController),
             _buildRow('Xufton', 'Xufton Takbir', xuftonController,
                 xuftonTakbirController),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
-                // Update the Firestore document with the new timestamp values
                 await _updatePrayerTimesInFirestore();
-                Navigator.pop(context); // Close the edit screen
+                Navigator.pop(context);
+                Navigator.pushNamed(context, './main/');
               },
               child: const Text('Tayyor'),
             ),
@@ -703,8 +698,7 @@ class _EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
             decoration: InputDecoration(labelText: label1),
           ),
         ),
-        const SizedBox(
-            width: 16), // Adjust the spacing between text fields as needed
+        const SizedBox(width: 16),
         Expanded(
           child: TextField(
             controller: controller2,
@@ -726,7 +720,6 @@ class _EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
 
     if (prayerTimeSnapshot.docs.isNotEmpty) {
       final prayerTimeDocRef = prayerTimeSnapshot.docs.first.reference;
-      // Fetch the relevant prayer time document reference
 
       await prayerTimeDocRef.update({
         'bomdod': Timestamp.fromDate(
