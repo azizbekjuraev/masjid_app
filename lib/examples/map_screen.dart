@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 import 'package:map_launcher/map_launcher.dart';
@@ -8,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:csv/csv.dart';
 import 'package:analog_clock/analog_clock.dart';
+import 'package:masjid_app/examples/data/user_data.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:async' show Future;
 
@@ -370,6 +372,11 @@ class _ModalBodyViewState extends State<_ModalBodyView> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double dynamicFontSize = screenWidth * 0.04;
+    final currUser = FirebaseAuth.instance.currentUser;
+    final userEmail = UserData.getUserEmail();
+    print(currUser?.email);
+    print(userEmail);
+    print(currUser?.email == userEmail); // this is true
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -449,24 +456,27 @@ class _ModalBodyViewState extends State<_ModalBodyView> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        OutlinedButton.icon(
-                          onPressed: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => EditPrayerTimesScreen(
-                                  point: widget.point,
-                                  prayerTimes: widget.prayerTimes,
+                        Visibility(
+                          visible: currUser?.email == userEmail,
+                          child: OutlinedButton.icon(
+                            onPressed: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditPrayerTimesScreen(
+                                    point: widget.point,
+                                    prayerTimes: widget.prayerTimes,
+                                  ),
                                 ),
-                              ),
-                            );
-                            //
-                          },
-                          icon: const Icon(
-                            Icons.edit_outlined,
-                            size: 15,
+                              );
+                              //
+                            },
+                            icon: const Icon(
+                              Icons.edit_outlined,
+                              size: 15,
+                            ),
+                            label: const Text('Yangilash'),
                           ),
-                          label: const Text('Yangilash'),
                         ),
                         Column(
                           children: [
@@ -676,8 +686,21 @@ class _EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
+                // Show loading indicator
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
+                  barrierDismissible: false,
+                );
+                // Perform async operation (e.g., updating data in Firestore)
                 await _updatePrayerTimesInFirestore();
+                // Close the loading indicator
                 Navigator.pop(context);
+                // Push to the new screen
                 Navigator.pushNamed(context, './main/');
               },
               child: const Text('Tayyor'),

@@ -9,9 +9,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:masjid_app/firebase_options.dart';
 import 'package:masjid_app/examples/widgets/drower_widget.dart';
 import 'package:masjid_app/examples/views/login_view.dart';
+import 'package:masjid_app/examples/data/user_data.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await UserData.init();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(MaterialApp(home: const MainPage(), routes: {
     './login/': (context) => const LoginView(),

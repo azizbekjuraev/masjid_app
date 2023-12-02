@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:masjid_app/examples/data/user_data.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({Key? key}) : super(key: key);
@@ -28,6 +29,16 @@ class _LoginViewState extends State<LoginView> {
 
   Future<void> _signInWithEmailAndPassword() async {
     try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      );
+
       final String email = _email.text.trim();
       final String password = _password.text;
 
@@ -42,10 +53,9 @@ class _LoginViewState extends State<LoginView> {
         email: email,
         password: password,
       );
-
+      await UserData.setEmail(email);
       // Access the logged-in user details
       User? user = userCredential.user;
-      print(user?.email == email);
       if (user?.email == email) {
         Navigator.pushNamed(context, './main/');
       }

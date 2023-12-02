@@ -1,20 +1,24 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:masjid_app/examples/utils/signout_dialog.dart';
+import 'package:masjid_app/examples/data/user_data.dart';
 
 class DrowerWidgets {
   Widget appBarDrow(BuildContext context) {
-    // final userEmail = UserData.getUserEmail();
-    // final displayName = UserData.getDisplayName();
+    final displayName = UserData.getDisplayName();
+    final currUser = FirebaseAuth.instance.currentUser;
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           UserAccountsDrawerHeader(
-            accountName: const Row(
-              children: [
-                // if (displayName != null) Text(displayName),
-              ],
+            accountName: Row(
+              children: [if (displayName != null) Text(displayName)],
             ),
-            accountEmail: const Text('Azizbek Juraev'),
+            accountEmail: Row(children: [
+              if (currUser?.email != null) Text(currUser?.email as String)
+            ]),
             currentAccountPicture: CircleAvatar(
               child: ClipOval(
                 child: Image.network(
@@ -84,11 +88,11 @@ class DrowerWidgets {
             title: const Text('Exit'),
             leading: const Icon(Icons.exit_to_app),
             onTap: () async {
-              // try {
-              //   showSignOutConfirmationDialog(context);
-              // } catch (e) {
-              //   print("$e");
-              // }
+              try {
+                showSignOutConfirmationDialog(context);
+              } catch (e) {
+                print("$e");
+              }
             },
           ),
         ],
