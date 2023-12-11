@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:masjid_app/examples/map_point.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:csv/csv.dart';
 import 'package:analog_clock/analog_clock.dart';
 import 'package:masjid_app/examples/data/user_data.dart';
+import 'package:toastification/toastification.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:async' show Future;
 
@@ -71,7 +73,8 @@ class _MapScreenState extends State<MapScreen> {
         isLoaded = true;
       });
     } catch (e) {
-      print('Error fetching data: $e');
+      if (!context.mounted) return;
+      showAlertDialog(context, 'Error fetching data', '$e');
     }
   }
 
@@ -205,9 +208,6 @@ class _MapScreenState extends State<MapScreen> {
 
       if (existingDocs.docs.isEmpty) {
         await masjids.add(record);
-        print('Record added to Firestore');
-      } else {
-        print('Record already exists in Firestore');
       }
     }
   }
@@ -374,9 +374,6 @@ class _ModalBodyViewState extends State<_ModalBodyView> {
     double dynamicFontSize = screenWidth * 0.04;
     final currUser = FirebaseAuth.instance.currentUser;
     final userEmail = UserData.getUserEmail();
-    print(currUser?.email);
-    print(userEmail);
-    print(currUser?.email == userEmail); // this is true
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -610,7 +607,7 @@ class _ModalBodyViewState extends State<_ModalBodyView> {
         },
       );
     } catch (e) {
-      print(e);
+      showAlertDialog(context, 'Xatolik', '$e');
     }
   }
 }
@@ -686,7 +683,6 @@ class _EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
-                // Show loading indicator
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
@@ -697,11 +693,19 @@ class _EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
                   barrierDismissible: false,
                 );
                 // Perform async operation (e.g., updating data in Firestore)
-                await _updatePrayerTimesInFirestore();
-                // Close the loading indicator
-                Navigator.pop(context);
-                // Push to the new screen
-                Navigator.pushNamed(context, './main/');
+                await _updatePrayerTimesInFirestore()
+                    .then((value) => Navigator.pop(context))
+                    .then((value) => toastification.show(
+                          context: context,
+                          type: ToastificationType.success,
+                          style: ToastificationStyle.flat,
+                          title: 'Muoffaqiyatli yangilandi!',
+                          alignment: Alignment.bottomCenter,
+                          autoCloseDuration: const Duration(seconds: 4),
+                          borderRadius: BorderRadius.circular(12.0),
+                          boxShadow: lowModeShadow,
+                        ))
+                    .then((value) => Navigator.pushNamed(context, './main/'));
               },
               child: const Text('Tayyor'),
             ),

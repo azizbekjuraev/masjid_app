@@ -57,7 +57,7 @@ class _SearchExampleState extends State<_SearchExample> {
     final resultWithSession = YandexSearch.searchByText(
       searchText: query,
       geometry: Geometry.fromBoundingBox(
-        BoundingBox(
+        const BoundingBox(
           southWest: Point(latitude: 40.9727, longitude: 71.0419),
           northEast: Point(latitude: 41.0592, longitude: 71.1531),
         ),

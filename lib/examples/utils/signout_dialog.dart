@@ -6,17 +6,17 @@ void showSignOutConfirmationDialog(BuildContext context) {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Sign Out Confirmation'),
-        content: const Text('Are you sure you want to sign out?'),
+        title: const Text('Chiqishni tasdiqlash'),
+        content: const Text('Haqiqatan ham tizimdan chiqmoqchimisiz?'),
         actions: <Widget>[
           TextButton(
-            child: const Text('Cancel'),
+            child: const Text('Bekor qilish'),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
           TextButton(
-            child: const Text('Sign Out'),
+            child: const Text('Tizimdan chiqish'),
             onPressed: () async {
               try {
                 // Display a CircularProgressIndicator to indicate the sign-out process
@@ -30,11 +30,13 @@ void showSignOutConfirmationDialog(BuildContext context) {
                   },
                 );
 
-                await FirebaseAuth.instance.signOut();
+                await FirebaseAuth.instance
+                    .signOut()
+                    .then((value) => Navigator.pushNamed(context, './main/'));
 
-                Future.delayed(const Duration(seconds: 1), () {
-                  Navigator.pushNamed(context, './main/');
-                });
+                // Future.delayed(const Duration(seconds: 1), () {
+                //   Navigator.pushNamed(context, './main/');
+                // });
               } catch (e) {
                 // Handle the error
                 print('Error signing out: $e');

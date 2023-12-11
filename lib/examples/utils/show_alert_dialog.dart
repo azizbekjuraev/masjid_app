@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-void showAlertDialog(BuildContext context, String title, String content,
+void showAlertDialog(BuildContext context, String title, Object content,
     {bool showProgress = false}) {
   showDialog(
     context: context,
@@ -13,14 +13,14 @@ void showAlertDialog(BuildContext context, String title, String content,
                 children: [
                   const CircularProgressIndicator(),
                   const SizedBox(height: 8),
-                  Text(content),
+                  Text(content as String),
                 ],
               )
-            : Text(content),
+            : Text(content as String),
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(context, rootNavigator: true).pop(context);
             },
             child: const Text('OK'),
           ),

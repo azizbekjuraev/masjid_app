@@ -1,9 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:masjid_app/examples/data/user_data.dart';
+import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 class LoginView extends StatefulWidget {
-  const LoginView({Key? key}) : super(key: key);
+  const LoginView({super.key});
 
   @override
   State<LoginView> createState() => _LoginViewState();
@@ -29,6 +31,19 @@ class _LoginViewState extends State<LoginView> {
 
   Future<void> _signInWithEmailAndPassword() async {
     try {
+      final String email = _email.text.trim();
+      final String password = _password.text;
+
+      print(email);
+
+      if (email.isEmpty) {
+        showAlertDialog(context, 'Xato', 'Elektron pochtangizni kiriting');
+        return;
+      } else if (password.isEmpty) {
+        showAlertDialog(context, 'Xato', 'Parolingizni kiriting');
+        return;
+      }
+
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -39,36 +54,45 @@ class _LoginViewState extends State<LoginView> {
         },
       );
 
-      final String email = _email.text.trim();
-      final String password = _password.text;
-
-      if (email.isEmpty || password.isEmpty) {
-        // Show an error message, e.g., using a function to display an alert
-        // showErrorDialog(context, 'Email and password are required.');
-        return;
-      }
-
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      await UserData.setEmail(email);
-      // Access the logged-in user details
-      User? user = userCredential.user;
-      if (user?.email == email) {
-        Navigator.pushNamed(context, './main/');
+
+      // Close the dialog
+      if (!context.mounted) return;
+      Navigator.pop(context);
+
+      UserData.setEmail(email).then((_) {
+        // Access the logged-in user details
+        User? user = userCredential.user;
+        if (user?.email == email) {
+          Navigator.pushNamed(context, './main/');
+        }
+      }).catchError((error) {
+        showAlertDialog(context, 'Error setting email', '$error');
+      });
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        showAlertDialog(context, 'Error', 'User not found!');
+        return;
+      } else if (e.code == 'wrong-password') {
+        showAlertDialog(
+            context, 'Error', 'Your password is incorrect, try again!');
+        return;
+      } else if (e.code == 'network-request-failed') {
+        showAlertDialog(context, 'Network Request Failed.',
+            'You do not have a proper network connection.');
+        return;
+      } else if (e.code == 'email-already-in-use') {
+        showAlertDialog(context, "Error",
+            'The email address is already in use by another account.');
+        return;
+      } else if (e.code == 'INVALID_LOGIN_CREDENTIALS') {
+        showAlertDialog(context, "Error", "Register first, then log in!");
+        return;
       }
-
-      // Now you can navigate to the next screen or perform other actions
-      // For example, you can use Navigator.pushReplacement() to replace the login screen
-      // with the home screen.
-
-      print('User logged in: ${user?.uid}');
-    } catch (e) {
-      print('Error signing in: $e');
-      // Show an error message, e.g., using a function to display an alert
-      // showErrorDialog(context, 'Failed to sign in. Check your email and password.');
     }
   }
 
@@ -114,19 +138,12 @@ class _LoginViewState extends State<LoginView> {
               height,
               Column(
                 children: [
-                  TextButton(
+                  PlatformTextButton(
                     onPressed: () async {
                       await _signInWithEmailAndPassword();
                     },
                     child: const Text('Kirish'),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      // Navigate to the registration screen
-                      // Navigator.push(context, MaterialPageRoute(builder: (context) => RegistrationView()));
-                    },
-                    child: const Text('Not registered yet? Register here!'),
-                  )
                 ],
               )
             ],

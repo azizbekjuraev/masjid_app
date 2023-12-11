@@ -2,11 +2,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:masjid_app/examples/utils/signout_dialog.dart';
 import 'package:masjid_app/examples/data/user_data.dart';
+import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
 
 class DrowerWidgets {
   Widget appBarDrow(BuildContext context) {
     final displayName = UserData.getDisplayName();
     final currUser = FirebaseAuth.instance.currentUser;
+    final userEmail = UserData.getUserEmail();
 
     return Drawer(
       child: ListView(
@@ -46,55 +48,63 @@ class DrowerWidgets {
               ),
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.favorite),
-            title: const Text('Favorites'),
-            onTap: () {},
+          // ListTile(
+          //   leading: const Icon(Icons.favorite),
+          //   title: const Text('Favorites'),
+          //   onTap: () {},
+          // ),
+          // ListTile(
+          //   leading: const Icon(Icons.person),
+          //   title: const Text('Friends'),
+          //   onTap: () {},
+          // ),
+          // ListTile(
+          //   leading: const Icon(Icons.share),
+          //   title: const Text('Share'),
+          //   onTap: () {},
+          // ),
+          // const ListTile(
+          //   leading: Icon(Icons.notifications),
+          //   title: Text('Request'),
+          // ),
+          Visibility(
+            visible: currUser?.email != userEmail,
+            child: ListTile(
+              leading: const Icon(Icons.login),
+              title: const Text('Tizimga Kirish'),
+              onTap: () {
+                Navigator.pushNamed(context, './login/');
+              },
+            ),
           ),
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text('Friends'),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: const Icon(Icons.share),
-            title: const Text('Share'),
-            onTap: () {},
-          ),
-          const ListTile(
-            leading: Icon(Icons.notifications),
-            title: Text('Request'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.login),
-            title: const Text('Tizimga Kirish'),
-            onTap: () {
-              Navigator.pushNamed(context, './login/');
-            },
+          FloatingActionButton(onPressed: () {}),
+          // const Divider(),
+          // ListTile(
+          //   leading: const Icon(Icons.settings),
+          //   title: const Text('Settings'),
+          //   onTap: () {},
+          // ),
+          // ListTile(
+          //   leading: const Icon(Icons.description),
+          //   title: const Text('Policies'),
+          //   onTap: () {},
+          // ),
+          // const Divider(),
+          Visibility(
+            visible: currUser?.email == userEmail,
+            child: ListTile(
+              title: const Text('Tizimdan Chiqish'),
+              leading: const Icon(Icons.exit_to_app),
+              onTap: () async {
+                try {
+                  showSignOutConfirmationDialog(context);
+                } catch (e) {
+                  showAlertDialog(context, 'Error', e);
+                }
+              },
+            ),
           ),
           const Divider(),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: const Icon(Icons.description),
-            title: const Text('Policies'),
-            onTap: () {},
-          ),
-          const Divider(),
-          ListTile(
-            title: const Text('Exit'),
-            leading: const Icon(Icons.exit_to_app),
-            onTap: () async {
-              try {
-                showSignOutConfirmationDialog(context);
-              } catch (e) {
-                print("$e");
-              }
-            },
-          ),
         ],
       ),
     );
