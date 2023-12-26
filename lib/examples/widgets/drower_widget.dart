@@ -19,7 +19,24 @@ class DrowerWidgets {
               children: [if (displayName != null) Text(displayName)],
             ),
             accountEmail: Row(children: [
-              if (currUser?.email != null) Text(currUser?.email as String)
+              (currUser?.email != null)
+                  ? Container(
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.black87,
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      child: Text(currUser?.email as String))
+                  : Container(
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.black87,
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      child: const Text(
+                        'Tizimga kirmagansiz!',
+                      ),
+                    ),
             ]),
             currentAccountPicture: CircleAvatar(
               child: ClipOval(
@@ -67,17 +84,13 @@ class DrowerWidgets {
           //   leading: Icon(Icons.notifications),
           //   title: Text('Request'),
           // ),
-          Visibility(
-            visible: currUser?.email != userEmail,
-            child: ListTile(
-              leading: const Icon(Icons.login),
-              title: const Text('Tizimga Kirish'),
-              onTap: () {
-                Navigator.pushNamed(context, './login/');
-              },
-            ),
+          ListTile(
+            leading: const Icon(Icons.login),
+            title: const Text('Tizimga Kirish'),
+            onTap: () {
+              Navigator.pushNamed(context, './login/');
+            },
           ),
-          FloatingActionButton(onPressed: () {}),
           // const Divider(),
           // ListTile(
           //   leading: const Icon(Icons.settings),
@@ -90,19 +103,16 @@ class DrowerWidgets {
           //   onTap: () {},
           // ),
           // const Divider(),
-          Visibility(
-            visible: currUser?.email == userEmail,
-            child: ListTile(
-              title: const Text('Tizimdan Chiqish'),
-              leading: const Icon(Icons.exit_to_app),
-              onTap: () async {
-                try {
-                  showSignOutConfirmationDialog(context);
-                } catch (e) {
-                  showAlertDialog(context, 'Error', e);
-                }
-              },
-            ),
+          ListTile(
+            title: const Text('Tizimdan Chiqish'),
+            leading: const Icon(Icons.exit_to_app),
+            onTap: () async {
+              try {
+                showSignOutConfirmationDialog(context);
+              } catch (e) {
+                showAlertDialog(context, 'Error', e);
+              }
+            },
           ),
           const Divider(),
         ],

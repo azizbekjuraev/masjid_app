@@ -311,7 +311,7 @@ class _MapScreenState extends State<MapScreen> {
               backgroundColor: Colors.white,
               foregroundColor: Colors.black,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(0)),
+                  borderRadius: BorderRadius.circular(10)),
               onPressed: () async {
                 await _mapController.moveCamera(CameraUpdate.zoomIn());
               },
@@ -325,7 +325,7 @@ class _MapScreenState extends State<MapScreen> {
               backgroundColor: Colors.white,
               foregroundColor: Colors.black,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(0)),
+                  borderRadius: BorderRadius.circular(10)),
               onPressed: () async {
                 await _mapController.moveCamera(CameraUpdate.zoomOut());
               },
@@ -380,119 +380,125 @@ class _ModalBodyViewState extends State<_ModalBodyView> {
       child: InteractiveViewer(
         minScale: 1,
         maxScale: 3,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(widget.point.name,
-                    style: TextStyle(fontSize: dynamicFontSize)),
-                TextButton(
-                  onPressed: () async {
-                    await _openMapsSheet(context);
-                  },
-                  child: const Icon(Icons.location_on_outlined),
-                ),
-              ],
-            ),
-            const SizedBox(height: 5),
-            for (var time in widget.prayerTimes)
-              Column(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'Azon Vaqtlari',
-                    style: TextStyle(color: Colors.redAccent),
+                  FittedBox(
+                    child: Text(widget.point.name,
+                        style: TextStyle(fontSize: dynamicFontSize)),
                   ),
-                  const SizedBox(height: 5),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10.0, vertical: 1.0),
-                    child: Table(
-                      defaultVerticalAlignment:
-                          TableCellVerticalAlignment.bottom,
-                      border: TableBorder.all(width: 0, color: Colors.black),
-                      children: [
-                        TableRow(
-                          children: [
-                            for (var time in widget.prayerTimes)
-                              ..._buildAzonPrayerTimeCells(time, myTextStyle),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-
-                  const Text(
-                    'Takbir Vaqtlari',
-                    style: TextStyle(color: Colors.blueAccent),
-                  ),
-                  const SizedBox(height: 5),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10.0, vertical: 1.0),
-                    child: Table(
-                      defaultVerticalAlignment:
-                          TableCellVerticalAlignment.bottom,
-                      border: TableBorder.all(width: 0, color: Colors.black),
-                      children: [
-                        TableRow(
-                          children: [
-                            for (var time in widget.prayerTimes)
-                              ..._buildTakbirPrayerTimeCells(time, myTextStyle),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  //Yangilash
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Visibility(
-                          visible: currUser?.email == userEmail,
-                          child: OutlinedButton.icon(
-                            onPressed: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EditPrayerTimesScreen(
-                                    point: widget.point,
-                                    prayerTimes: widget.prayerTimes,
-                                  ),
-                                ),
-                              );
-                              //
-                            },
-                            icon: const Icon(
-                              Icons.edit_outlined,
-                              size: 15,
-                            ),
-                            label: const Text('Yangilash'),
-                          ),
-                        ),
-                        Column(
-                          children: [
-                            const Text(
-                              'Yangilangan sana:',
-                              style: TextStyle(color: Colors.deepPurple),
-                            ),
-                            Text(
-                              '${time['created_at']}',
-                              style: const TextStyle(fontSize: 15),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
+                  TextButton(
+                    onPressed: () async {
+                      await _openMapsSheet(context);
+                    },
+                    child: const Icon(Icons.location_on_outlined),
                   ),
                 ],
               ),
-          ],
+              const SizedBox(height: 5),
+              for (var time in widget.prayerTimes)
+                Column(
+                  children: [
+                    const Text(
+                      'Azon Vaqtlari',
+                      style: TextStyle(color: Colors.redAccent),
+                    ),
+                    const SizedBox(height: 5),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10.0, vertical: 1.0),
+                      child: Table(
+                        defaultVerticalAlignment:
+                            TableCellVerticalAlignment.bottom,
+                        border: TableBorder.all(width: 0, color: Colors.black),
+                        children: [
+                          TableRow(
+                            children: [
+                              for (var time in widget.prayerTimes)
+                                ..._buildAzonPrayerTimeCells(time, myTextStyle),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+
+                    const Text(
+                      'Takbir Vaqtlari',
+                      style: TextStyle(color: Colors.blueAccent),
+                    ),
+                    const SizedBox(height: 5),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10.0, vertical: 1.0),
+                      child: Table(
+                        defaultVerticalAlignment:
+                            TableCellVerticalAlignment.bottom,
+                        border: TableBorder.all(width: 0, color: Colors.black),
+                        children: [
+                          TableRow(
+                            children: [
+                              for (var time in widget.prayerTimes)
+                                ..._buildTakbirPrayerTimeCells(
+                                    time, myTextStyle),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    //Yangilash
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Visibility(
+                            visible: currUser?.email == userEmail &&
+                                currUser?.email != null,
+                            child: OutlinedButton.icon(
+                              onPressed: () async {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditPrayerTimesScreen(
+                                      point: widget.point,
+                                      prayerTimes: widget.prayerTimes,
+                                    ),
+                                  ),
+                                );
+                                //
+                              },
+                              icon: const Icon(
+                                Icons.edit_outlined,
+                                size: 15,
+                              ),
+                              label: const Text('Yangilash'),
+                            ),
+                          ),
+                          Column(
+                            children: [
+                              const Text(
+                                'Yangilangan sana:',
+                                style: TextStyle(color: Colors.deepPurple),
+                              ),
+                              Text(
+                                '${time['created_at']}',
+                                style: const TextStyle(fontSize: 15),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -522,9 +528,11 @@ class _ModalBodyViewState extends State<_ModalBodyView> {
       ])
         Column(
           children: [
-            Text(
-              removeSuffix(prayer),
-              style: myTextStyle,
+            FittedBox(
+              child: Text(
+                removeSuffix(prayer),
+                style: myTextStyle,
+              ),
             ),
             _buildAnalogClock(time[prayer.toLowerCase()]!),
           ],
@@ -537,9 +545,11 @@ class _ModalBodyViewState extends State<_ModalBodyView> {
     return [
       Column(
         children: [
-          Text(
-            label,
-            style: myTextStyle,
+          FittedBox(
+            child: Text(
+              label,
+              style: myTextStyle,
+            ),
           ),
           _buildAnalogClock(time),
         ],
@@ -663,53 +673,57 @@ class _EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text('Namoz Vaqtlarini Yangilash'),
+        title: const FittedBox(child: const Text('Namoz Vaqtlarini Yangilash')),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildRow('Bomdod', 'Bomdod Takbir', bomdodController,
-                bomdodTakbirController),
-            _buildRow('Peshin', 'Peshin Takbir', peshinController,
-                peshinTakbirController),
-            _buildRow('Asr', 'Asr Takbir', asrController, asrTakbirController),
-            _buildRow(
-                'Shom', 'Shom Takbir', shomController, shomTakbirController),
-            _buildRow('Xufton', 'Xufton Takbir', xuftonController,
-                xuftonTakbirController),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () async {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  },
-                  barrierDismissible: false,
-                );
-                // Perform async operation (e.g., updating data in Firestore)
-                await _updatePrayerTimesInFirestore()
-                    .then((value) => Navigator.pop(context))
-                    .then((value) => toastification.show(
-                          context: context,
-                          type: ToastificationType.success,
-                          style: ToastificationStyle.flat,
-                          title: 'Muoffaqiyatli yangilandi!',
-                          alignment: Alignment.bottomCenter,
-                          autoCloseDuration: const Duration(seconds: 4),
-                          borderRadius: BorderRadius.circular(12.0),
-                          boxShadow: lowModeShadow,
-                        ))
-                    .then((value) => Navigator.pushNamed(context, './main/'));
-              },
-              child: const Text('Tayyor'),
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildRow('Bomdod', 'Bomdod Takbir', bomdodController,
+                  bomdodTakbirController),
+              _buildRow('Peshin', 'Peshin Takbir', peshinController,
+                  peshinTakbirController),
+              _buildRow(
+                  'Asr', 'Asr Takbir', asrController, asrTakbirController),
+              _buildRow(
+                  'Shom', 'Shom Takbir', shomController, shomTakbirController),
+              _buildRow('Xufton', 'Xufton Takbir', xuftonController,
+                  xuftonTakbirController),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () async {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    },
+                    barrierDismissible: false,
+                  );
+                  // Perform async operation (e.g., updating data in Firestore)
+                  await _updatePrayerTimesInFirestore()
+                      .then((value) => Navigator.pop(context))
+                      .then((value) => toastification.show(
+                            context: context,
+                            type: ToastificationType.success,
+                            style: ToastificationStyle.flat,
+                            title: 'Muoffaqiyatli yangilandi!',
+                            alignment: Alignment.bottomCenter,
+                            autoCloseDuration: const Duration(seconds: 4),
+                            borderRadius: BorderRadius.circular(12.0),
+                            boxShadow: lowModeShadow,
+                          ))
+                      .then((value) => Navigator.pushNamed(context, './main/'));
+                },
+                child: const Text('Tayyor'),
+              ),
+            ],
+          ),
         ),
       ),
     );

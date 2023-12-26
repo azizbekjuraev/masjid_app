@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:masjid_app/examples/data/user_data.dart';
 import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:toastification/toastification.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -98,55 +99,68 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
+    final userEmail = UserData.getUserEmail();
     const height = SizedBox(
       height: 20,
     );
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Masjid App'),
+        title: const FittedBox(child: const Text('Masjidlar Takbir Vaqtlari')),
       ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Tizimga kirish',
-                style: TextStyle(fontSize: 30),
-              ),
-              height,
-              TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Elektron pochta',
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Tizimga kirish',
+                  style: TextStyle(fontSize: 30),
                 ),
-                keyboardType: TextInputType.emailAddress,
-                controller: _email,
-                enableSuggestions: false,
-                autocorrect: false,
-              ),
-              height,
-              TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Parol',
-                ),
-                controller: _password,
-                enableSuggestions: false,
-                autocorrect: false,
-                obscureText: true,
-              ),
-              height,
-              Column(
-                children: [
-                  PlatformTextButton(
-                    onPressed: () async {
-                      await _signInWithEmailAndPassword();
-                    },
-                    child: const Text('Kirish'),
+                height,
+                TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Elektron pochta',
                   ),
-                ],
-              )
-            ],
+                  keyboardType: TextInputType.emailAddress,
+                  controller: _email,
+                  enableSuggestions: false,
+                  autocorrect: false,
+                ),
+                height,
+                TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Parol',
+                  ),
+                  controller: _password,
+                  enableSuggestions: false,
+                  autocorrect: false,
+                  obscureText: true,
+                ),
+                height,
+                Column(
+                  children: [
+                    PlatformTextButton(
+                      onPressed: () async {
+                        await _signInWithEmailAndPassword()
+                            .then((value) => toastification.show(
+                                  context: context,
+                                  type: ToastificationType.success,
+                                  style: ToastificationStyle.flat,
+                                  title: 'Tizimga $userEmail orqali kirdingiz!',
+                                  alignment: Alignment.bottomCenter,
+                                  autoCloseDuration: const Duration(seconds: 4),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  boxShadow: lowModeShadow,
+                                ));
+                      },
+                      child: const Text('Kirish'),
+                    ),
+                  ],
+                )
+              ],
+            ),
           ),
         ),
       ),

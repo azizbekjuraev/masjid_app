@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:toastification/toastification.dart';
 
 void showSignOutConfirmationDialog(BuildContext context) {
   showDialog(
@@ -32,6 +33,16 @@ void showSignOutConfirmationDialog(BuildContext context) {
 
                 await FirebaseAuth.instance
                     .signOut()
+                    .then((value) => toastification.show(
+                          context: context,
+                          type: ToastificationType.success,
+                          style: ToastificationStyle.flat,
+                          title: 'Tizimdan muoffaqiyatli chiqildi!',
+                          alignment: Alignment.bottomCenter,
+                          autoCloseDuration: const Duration(seconds: 4),
+                          borderRadius: BorderRadius.circular(12.0),
+                          boxShadow: lowModeShadow,
+                        ))
                     .then((value) => Navigator.pushNamed(context, './main/'));
 
                 // Future.delayed(const Duration(seconds: 1), () {
