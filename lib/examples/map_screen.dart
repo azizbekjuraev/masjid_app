@@ -31,7 +31,9 @@ class _MapScreenState extends State<MapScreen> {
   late List<MapPoint> items = [];
   late List<Map<String, dynamic>> prayerItems = [];
   bool isLoaded = false;
+  int? _currentOpenModalIndex;
 
+  late Point _point = Point(latitude: 40.442314, longitude: 71.697144);
   // var _mapZoom = 0.0;
   CameraPosition? _userLocation;
 
@@ -108,7 +110,9 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   List<PlacemarkMapObject> _getPlacemarkObjects(BuildContext context) {
-    return items.map((point) {
+    return items.asMap().entries.map((entry) {
+      final index = entry.key;
+      final point = entry.value;
       return PlacemarkMapObject(
         mapId: MapObjectId('MapObject $point'),
         point: Point(latitude: point.latitude, longitude: point.longitude),
@@ -121,15 +125,30 @@ class _MapScreenState extends State<MapScreen> {
             scale: 0.25,
           ),
         ),
-        onTap: (_, __) => showModalBottomSheet(
-          enableDrag: true,
-          showDragHandle: true,
-          context: context,
-          builder: (context) => _ModalBodyView(
-            point: point,
-            prayerTimes: _getPrayerTimesForLocation(point),
-          ),
-        ),
+        onTap: (_, __) {
+          // Check if another modal is already open
+          if (_currentOpenModalIndex != null) {
+            Navigator.pop(context); // Close the currently open modal
+            // If the tapped marker is the same as the open one, clear the index
+            if (_currentOpenModalIndex == index) {
+              _currentOpenModalIndex = null;
+              return;
+            }
+          }
+
+          showModalBottomSheet(
+            enableDrag: true,
+            showDragHandle: true,
+            context: context,
+            builder: (context) => _ModalBodyView(
+              point: point,
+              prayerTimes: _getPrayerTimesForLocation(point),
+            ),
+          ).whenComplete(() {
+            _currentOpenModalIndex = null;
+          });
+          _currentOpenModalIndex = index;
+        },
       );
     }).toList();
   }
@@ -264,6 +283,9 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // _mapController.moveCamera(
+    //     CameraUpdate.newCameraPosition(const CameraPosition(target: _point)),
+    //     animation: animation);
     return Scaffold(
       body: Stack(
         children: [
@@ -331,6 +353,15 @@ class _MapScreenState extends State<MapScreen> {
               },
               child: const Icon(Icons.remove),
             ),
+          ),
+          TextButton(
+            onPressed: () async {
+              await _mapController.moveCamera(
+                  CameraUpdate.newCameraPosition(
+                      CameraPosition(target: _point)),
+                  animation: animation);
+            },
+            child: const Text('new'),
           ),
           Positioned(
             bottom: 40.0,
@@ -471,6 +502,7 @@ class _ModalBodyViewState extends State<_ModalBodyView> {
                                     ),
                                   ),
                                 );
+                                Navigator.pop(context);
                                 //
                               },
                               icon: const Icon(
@@ -675,7 +707,7 @@ class _EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const FittedBox(child: const Text('Namoz Vaqtlarini Yangilash')),
+        title: const FittedBox(child: Text('Namoz Vaqtlarini Yangilash')),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -696,6 +728,8 @@ class _EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () async {
+                  // Dismiss the keyboard
+                  FocusScope.of(context).unfocus();
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
@@ -712,13 +746,13 @@ class _EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
                             context: context,
                             type: ToastificationType.success,
                             style: ToastificationStyle.flat,
-                            title: 'Muoffaqiyatli yangilandi!',
-                            alignment: Alignment.bottomCenter,
-                            autoCloseDuration: const Duration(seconds: 4),
+                            title: 'Vaqtlar muoffaqiyatli yangilandi!',
+                            alignment: Alignment.bottomLeft,
+                            autoCloseDuration: const Duration(seconds: 3),
                             borderRadius: BorderRadius.circular(12.0),
                             boxShadow: lowModeShadow,
                           ))
-                      .then((value) => Navigator.pushNamed(context, './main/'));
+                      .then((value) => Navigator.pop(context));
                 },
                 child: const Text('Tayyor'),
               ),

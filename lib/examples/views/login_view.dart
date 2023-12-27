@@ -69,7 +69,8 @@ class _LoginViewState extends State<LoginView> {
         // Access the logged-in user details
         User? user = userCredential.user;
         if (user?.email == email) {
-          Navigator.pushNamed(context, './main/');
+          // Navigator.pushNamed(context, './main/');
+          Navigator.pop(context);
         }
       }).catchError((error) {
         showAlertDialog(context, 'Error setting email', '$error');
@@ -105,7 +106,7 @@ class _LoginViewState extends State<LoginView> {
     );
     return Scaffold(
       appBar: AppBar(
-        title: const FittedBox(child: const Text('Masjidlar Takbir Vaqtlari')),
+        title: const FittedBox(child: Text('Masjidlar Takbir Vaqtlari')),
       ),
       body: Center(
         child: Padding(
@@ -143,14 +144,15 @@ class _LoginViewState extends State<LoginView> {
                   children: [
                     PlatformTextButton(
                       onPressed: () async {
+                        FocusScope.of(context).unfocus();
                         await _signInWithEmailAndPassword()
                             .then((value) => toastification.show(
                                   context: context,
                                   type: ToastificationType.success,
                                   style: ToastificationStyle.flat,
-                                  title: 'Tizimga $userEmail orqali kirdingiz!',
-                                  alignment: Alignment.bottomCenter,
-                                  autoCloseDuration: const Duration(seconds: 4),
+                                  title: 'Tizimga admin bulib kirdingiz!',
+                                  alignment: Alignment.bottomLeft,
+                                  autoCloseDuration: const Duration(seconds: 3),
                                   borderRadius: BorderRadius.circular(12.0),
                                   boxShadow: lowModeShadow,
                                 ));

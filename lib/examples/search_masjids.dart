@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:masjid_app/examples/map_point.dart';
+import 'package:masjid_app/examples/map_screen.dart';
 
 class SearchMasjids extends StatefulWidget {
   const SearchMasjids({super.key});
@@ -102,6 +103,7 @@ class _SearchMasjidsState extends State<SearchMasjids> {
                   _showOptions = false;
                 });
               },
+              displayStringForOption: (MapPoint option) => option.name,
               fieldViewBuilder: (BuildContext context,
                   TextEditingController textEditingController,
                   FocusNode focusNode,
@@ -153,9 +155,8 @@ class _SearchMasjidsState extends State<SearchMasjids> {
                             .map(
                               (MapPoint option) => GestureDetector(
                                 onTap: () {
-                                  print(option.name);
                                   onSelected(option);
-                                  _searchController.text = option.name;
+                                  // _searchController.text = option.name;
                                   // Hide options when an option is selected
                                   setState(() {
                                     _showOptions = false;

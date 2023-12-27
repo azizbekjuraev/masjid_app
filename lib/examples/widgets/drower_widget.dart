@@ -15,29 +15,34 @@ class DrowerWidgets {
         padding: EdgeInsets.zero,
         children: [
           UserAccountsDrawerHeader(
-            accountName: Row(
-              children: [if (displayName != null) Text(displayName)],
-            ),
-            accountEmail: Row(children: [
-              (currUser?.email != null)
-                  ? Container(
-                      padding: const EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                        color: Colors.black87,
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: Text(currUser?.email as String))
-                  : Container(
-                      padding: const EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                        color: Colors.black87,
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: const Text(
-                        'Tizimga kirmagansiz!',
-                      ),
-                    ),
-            ]),
+            accountName: Container(
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  color: Colors.black87,
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                child: const Text('Hush kelibsiz!')),
+            // accountEmail: Row(children: [
+            //   (currUser?.email != null)
+            //       ? Container(
+            //           padding: const EdgeInsets.all(8.0),
+            //           decoration: BoxDecoration(
+            //             color: Colors.black87,
+            //             borderRadius: BorderRadius.circular(10.0),
+            //           ),
+            //           child: Text(currUser?.email as String))
+            //       : Container(
+            //           padding: const EdgeInsets.all(8.0),
+            //           decoration: BoxDecoration(
+            //             color: Colors.black87,
+            //             borderRadius: BorderRadius.circular(10.0),
+            //           ),
+            //           child: const Text(
+            //             'Tizimga kirmagansiz!',
+            //           ),
+            //         ),
+            // ]),
+            accountEmail: null,
             currentAccountPicture: CircleAvatar(
               child: ClipOval(
                 child: Image.network(
@@ -88,7 +93,8 @@ class DrowerWidgets {
             leading: const Icon(Icons.login),
             title: const Text('Tizimga Kirish'),
             onTap: () {
-              Navigator.pushNamed(context, './login/');
+              Navigator.pushNamed(context, './login/')
+                  .then((value) => Navigator.of(context).pop());
             },
           ),
           // const Divider(),

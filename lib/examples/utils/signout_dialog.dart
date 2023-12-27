@@ -7,7 +7,7 @@ void showSignOutConfirmationDialog(BuildContext context) {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Chiqishni tasdiqlash'),
+        title: const FittedBox(child: Text('Chiqishni tasdiqlash')),
         content: const Text('Haqiqatan ham tizimdan chiqmoqchimisiz?'),
         actions: <Widget>[
           TextButton(
@@ -20,6 +20,7 @@ void showSignOutConfirmationDialog(BuildContext context) {
             child: const Text('Tizimdan chiqish'),
             onPressed: () async {
               try {
+                Navigator.of(context).pop();
                 // Display a CircularProgressIndicator to indicate the sign-out process
                 showDialog(
                   context: context,
@@ -30,7 +31,7 @@ void showSignOutConfirmationDialog(BuildContext context) {
                     );
                   },
                 );
-
+                Navigator.of(context).pop();
                 await FirebaseAuth.instance
                     .signOut()
                     .then((value) => toastification.show(
@@ -38,12 +39,12 @@ void showSignOutConfirmationDialog(BuildContext context) {
                           type: ToastificationType.success,
                           style: ToastificationStyle.flat,
                           title: 'Tizimdan muoffaqiyatli chiqildi!',
-                          alignment: Alignment.bottomCenter,
-                          autoCloseDuration: const Duration(seconds: 4),
+                          alignment: Alignment.bottomLeft,
+                          autoCloseDuration: const Duration(seconds: 3),
                           borderRadius: BorderRadius.circular(12.0),
                           boxShadow: lowModeShadow,
                         ))
-                    .then((value) => Navigator.pushNamed(context, './main/'));
+                    .then((value) => Navigator.of(context).pop());
 
                 // Future.delayed(const Duration(seconds: 1), () {
                 //   Navigator.pushNamed(context, './main/');
