@@ -11,13 +11,16 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:csv/csv.dart';
 import 'package:analog_clock/analog_clock.dart';
 import 'package:masjid_app/examples/data/user_data.dart';
-import 'package:toastification/toastification.dart';
 import 'package:masjid_app/examples/widgets/drawer_widget.dart';
+import 'package:masjid_app/examples/widgets/edit_prayer_times_screen.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:async' show Future;
 
+typedef LocationLayerInitCallback = Future<void> Function();
+
 class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+  final LocationLayerInitCallback? onLocationLayerInit;
+  const MapScreen({super.key, this.onLocationLayerInit});
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -95,6 +98,10 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  Future<void> onLocationLayerInit() async {
+    await _initLocationLayer();
+  }
+
   List<Map<String, dynamic>> _getPrayerTimes(
       List<QueryDocumentSnapshot> documents) {
     return documents.map((DocumentSnapshot document) {
@@ -158,6 +165,7 @@ class _MapScreenState extends State<MapScreen> {
             builder: (context) => _ModalBodyView(
               point: point,
               prayerTimes: _getPrayerTimesForLocation(point),
+              onLocationLayerInit: onLocationLayerInit,
             ),
           ).whenComplete(() {
             _currentOpenModalIndex = null;
@@ -405,6 +413,20 @@ class _MapScreenState extends State<MapScreen> {
                   ))
               : Container(),
           Positioned(
+            bottom: 100,
+            right: 5,
+            child: FloatingActionButton.small(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              onPressed: () async {
+                await _initLocationLayer();
+              },
+              child: const Icon(Icons.add),
+            ),
+          ),
+          Positioned(
             bottom: 450.0,
             right: 5,
             child: FloatingActionButton.small(
@@ -471,9 +493,13 @@ class _MapScreenState extends State<MapScreen> {
 }
 
 class _ModalBodyView extends StatefulWidget {
-  const _ModalBodyView({required this.point, required this.prayerTimes});
+  const _ModalBodyView(
+      {required this.point,
+      required this.prayerTimes,
+      required this.onLocationLayerInit});
   final MapPoint point;
   final List<Map<String, String>> prayerTimes;
+  final LocationLayerInitCallback onLocationLayerInit;
 
   @override
   State<_ModalBodyView> createState() => _ModalBodyViewState();
@@ -580,6 +606,8 @@ class _ModalBodyViewState extends State<_ModalBodyView> {
                                     builder: (context) => EditPrayerTimesScreen(
                                       point: widget.point,
                                       prayerTimes: widget.prayerTimes,
+                                      onLocationLayerInit:
+                                          widget.onLocationLayerInit,
                                     ),
                                   ),
                                 );
@@ -731,175 +759,6 @@ class _ModalBodyViewState extends State<_ModalBodyView> {
       );
     } catch (e) {
       showAlertDialog(context, 'Xatolik', '$e');
-    }
-  }
-}
-
-class EditPrayerTimesScreen extends StatefulWidget {
-  final MapPoint point;
-  final List<Map<String, String>> prayerTimes;
-
-  const EditPrayerTimesScreen(
-      {super.key, required this.point, required this.prayerTimes});
-
-  @override
-  EditPrayerTimesScreenState createState() => EditPrayerTimesScreenState();
-}
-
-class EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
-  // Add controllers for the edited timestamps
-  late TextEditingController bomdodController;
-  late TextEditingController bomdodTakbirController;
-  late TextEditingController peshinController;
-  late TextEditingController peshinTakbirController;
-  late TextEditingController asrController;
-  late TextEditingController asrTakbirController;
-  late TextEditingController shomController;
-  late TextEditingController shomTakbirController;
-  late TextEditingController xuftonController;
-  late TextEditingController xuftonTakbirController;
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize controllers with existing values
-    bomdodController =
-        TextEditingController(text: widget.prayerTimes[0]['bomdod']);
-    bomdodTakbirController =
-        TextEditingController(text: widget.prayerTimes[0]['bomdod_takbir']);
-    peshinController =
-        TextEditingController(text: widget.prayerTimes[0]['peshin']);
-    peshinTakbirController =
-        TextEditingController(text: widget.prayerTimes[0]['peshin_takbir']);
-    asrController = TextEditingController(text: widget.prayerTimes[0]['asr']);
-    asrTakbirController =
-        TextEditingController(text: widget.prayerTimes[0]['asr_takbir']);
-    shomController = TextEditingController(text: widget.prayerTimes[0]['shom']);
-    shomTakbirController =
-        TextEditingController(text: widget.prayerTimes[0]['shom_takbir']);
-    xuftonController =
-        TextEditingController(text: widget.prayerTimes[0]['xufton']);
-    xuftonTakbirController =
-        TextEditingController(text: widget.prayerTimes[0]['xufton_takbir']);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        title: const FittedBox(child: Text('Namoz Vaqtlarini Yangilash')),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildRow('Bomdod', 'Bomdod Takbir', bomdodController,
-                  bomdodTakbirController),
-              _buildRow('Peshin', 'Peshin Takbir', peshinController,
-                  peshinTakbirController),
-              _buildRow(
-                  'Asr', 'Asr Takbir', asrController, asrTakbirController),
-              _buildRow(
-                  'Shom', 'Shom Takbir', shomController, shomTakbirController),
-              _buildRow('Xufton', 'Xufton Takbir', xuftonController,
-                  xuftonTakbirController),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () async {
-                  // Dismiss the keyboard
-                  FocusScope.of(context).unfocus();
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    },
-                    barrierDismissible: false,
-                  );
-                  // Perform async operation (e.g., updating data in Firestore)
-                  await _updatePrayerTimesInFirestore()
-                      .then((value) => Navigator.pop(context))
-                      .then((value) => toastification.show(
-                            context: context,
-                            type: ToastificationType.success,
-                            style: ToastificationStyle.flat,
-                            title: 'Vaqtlar muoffaqiyatli yangilandi!',
-                            alignment: Alignment.bottomLeft,
-                            autoCloseDuration: const Duration(seconds: 3),
-                            borderRadius: BorderRadius.circular(12.0),
-                            boxShadow: lowModeShadow,
-                          ))
-                      .then((value) => Navigator.pop(context));
-                },
-                child: const Text('Tayyor'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRow(String label1, String label2,
-      TextEditingController controller1, TextEditingController controller2) {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: controller1,
-            decoration: InputDecoration(labelText: label1),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: TextField(
-            controller: controller2,
-            decoration: InputDecoration(labelText: label2),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _updatePrayerTimesInFirestore() async {
-    final prayerTimeSnapshot = await FirebaseFirestore.instance
-        .collection('prayer_time')
-        .where('masjid',
-            isEqualTo: FirebaseFirestore.instance
-                .collection('masjids')
-                .doc(widget.point.documentId))
-        .get();
-
-    if (prayerTimeSnapshot.docs.isNotEmpty) {
-      final prayerTimeDocRef = prayerTimeSnapshot.docs.first.reference;
-
-      await prayerTimeDocRef.update({
-        'bomdod': Timestamp.fromDate(
-            DateFormat('HH:mm').parse(bomdodController.text)),
-        'bomdod_takbir': Timestamp.fromDate(
-            DateFormat('HH:mm').parse(bomdodTakbirController.text)),
-        'peshin': Timestamp.fromDate(
-            DateFormat('HH:mm').parse(peshinController.text)),
-        'peshin_takbir': Timestamp.fromDate(
-            DateFormat('HH:mm').parse(peshinTakbirController.text)),
-        'asr':
-            Timestamp.fromDate(DateFormat('HH:mm').parse(asrController.text)),
-        'asr_takbir': Timestamp.fromDate(
-            DateFormat('HH:mm').parse(asrTakbirController.text)),
-        'shom':
-            Timestamp.fromDate(DateFormat('HH:mm').parse(shomController.text)),
-        'shom_takbir': Timestamp.fromDate(
-            DateFormat('HH:mm').parse(shomTakbirController.text)),
-        'xufton': Timestamp.fromDate(
-            DateFormat('HH:mm').parse(xuftonController.text)),
-        'xufton_takbir': Timestamp.fromDate(
-            DateFormat('HH:mm').parse(xuftonTakbirController.text)),
-        'created_at': Timestamp.fromDate(DateTime.now()),
-      });
     }
   }
 }
