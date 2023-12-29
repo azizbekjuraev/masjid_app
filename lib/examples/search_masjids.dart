@@ -78,111 +78,114 @@ class _SearchMasjidsState extends State<SearchMasjids> {
                 });
               }
             },
-            child: Autocomplete<MapPoint>(
-              optionsBuilder: (TextEditingValue textEditingValue) {
-                // Update _showOptions only if the text is not empty and matches any suggestion
-                setState(() {
-                  _showOptions = textEditingValue.text.isNotEmpty &&
-                      _masjidOptions.any((option) => option.name
-                          .toLowerCase()
-                          .contains(textEditingValue.text.toLowerCase()));
-                });
-                return _showOptions
-                    ? _masjidOptions
-                        .where((option) => option.name
+            child: Builder(builder: (context) {
+              return Autocomplete<MapPoint>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  // Update _showOptions only if the text is not empty and matches any suggestion
+                  setState(() {
+                    _showOptions = textEditingValue.text.isNotEmpty &&
+                        _masjidOptions.any((option) => option.name
                             .toLowerCase()
-                            .contains(textEditingValue.text.toLowerCase()))
-                        .toList()
-                    : [];
-              },
-              onSelected: (MapPoint selection) {
-                // Handle the selected option
-                // _searchController.text = selection.name;
-                // Hide options when an option is selected
-                setState(() {
-                  _showOptions = false;
-                });
-              },
-              displayStringForOption: (MapPoint option) => option.name,
-              fieldViewBuilder: (BuildContext context,
-                  TextEditingController textEditingController,
-                  FocusNode focusNode,
-                  VoidCallback onFieldSubmitted) {
-                return TextField(
-                  controller: textEditingController,
-                  focusNode: focusNode,
-                  autofocus: true,
-                  onChanged: (String value) {
-                    // You can use this to update the suggestions in real-time
-                  },
-                  decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.all(20.0),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        if (textEditingController.text == '') {
-                          Navigator.of(context).pop();
-                          // Hide options when text is cleared
-                          setState(() {
-                            _showOptions = false;
-                          });
-                        } else {
-                          // fetchData();
-                          textEditingController.text = '';
-                        }
-                      },
+                            .contains(textEditingValue.text.toLowerCase()));
+                  });
+                  return _showOptions
+                      ? _masjidOptions
+                          .where((option) => option.name
+                              .toLowerCase()
+                              .contains(textEditingValue.text.toLowerCase()))
+                          .toList()
+                      : [];
+                },
+
+                onSelected: (MapPoint selection) {
+                  // Handle the selected option
+                  // _searchController.text = selection.name;
+                  // Hide options when an option is selected
+                  setState(() {
+                    _showOptions = false;
+                  });
+                },
+                displayStringForOption: (MapPoint option) => option.name,
+                fieldViewBuilder: (BuildContext context,
+                    TextEditingController textEditingController,
+                    FocusNode focusNode,
+                    VoidCallback onFieldSubmitted) {
+                  return TextField(
+                    controller: textEditingController,
+                    focusNode: focusNode,
+                    autofocus: true,
+                    onChanged: (String value) {
+                      // You can use this to update the suggestions in real-time
+                    },
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.all(20.0),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          if (textEditingController.text == '') {
+                            Navigator.of(context).pop();
+                            // Hide options when text is cleared
+                            setState(() {
+                              _showOptions = false;
+                            });
+                          } else {
+                            // fetchData();
+                            textEditingController.text = '';
+                          }
+                        },
+                      ),
+                      hintText: 'Qidirmoq...',
+                      border: InputBorder.none,
                     ),
-                    hintText: 'Qidirmoq...',
-                    border: InputBorder.none,
-                  ),
-                );
-              },
-              optionsViewBuilder: (BuildContext context,
-                  AutocompleteOnSelected<MapPoint> onSelected,
-                  Iterable<MapPoint> options) {
-                double listViewHeight = options.length * 65.0;
-                listViewHeight = listViewHeight.clamp(65.0, 207.0);
-                return Align(
-                  alignment: Alignment.topLeft,
-                  child: Material(
-                    elevation: 4.0,
-                    child: SizedBox(
-                      height: listViewHeight,
-                      child: ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: EdgeInsets.zero,
-                        children: options
-                            .map(
-                              (MapPoint option) => GestureDetector(
-                                onTap: () {
-                                  onSelected(option);
-                                  // _searchController.text = option.name;
-                                  // Hide options when an option is selected
-                                  setState(() {
-                                    _showOptions = false;
-                                  });
-                                },
-                                child: ListTile(
-                                  horizontalTitleGap: 3.0,
-                                  title: Text(option.name),
-                                  subtitle: Text(
-                                      '${option.latitude} ${option.longitude}'),
-                                  leading: const Icon(
-                                    Icons.location_on_sharp,
-                                    size: 32,
+                  );
+                },
+                optionsViewBuilder: (BuildContext context,
+                    AutocompleteOnSelected<MapPoint> onSelected,
+                    Iterable<MapPoint> options) {
+                  double listViewHeight = options.length * 65.0;
+                  listViewHeight = listViewHeight.clamp(65.0, 207.0);
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: Material(
+                      elevation: 4.0,
+                      child: SizedBox(
+                        height: listViewHeight,
+                        child: ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          children: options
+                              .map(
+                                (MapPoint option) => GestureDetector(
+                                  onTap: () {
+                                    onSelected(option);
+                                    // _searchController.text = option.name;
+                                    // Hide options when an option is selected
+                                    setState(() {
+                                      _showOptions = false;
+                                    });
+                                  },
+                                  child: ListTile(
+                                    horizontalTitleGap: 3.0,
+                                    title: Text(option.name),
+                                    subtitle: Text(
+                                        '${option.latitude} ${option.longitude}'),
+                                    leading: const Icon(
+                                      Icons.location_on_sharp,
+                                      size: 32,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            )
-                            .toList(),
+                              )
+                              .toList(),
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-              optionsMaxHeight: 200.0,
-              // Show options only when typing and there are matching suggestions
-            ),
+                  );
+                },
+                optionsMaxHeight: 200.0,
+                // Show options only when typing and there are matching suggestions
+              );
+            }),
           ),
         ),
       ),

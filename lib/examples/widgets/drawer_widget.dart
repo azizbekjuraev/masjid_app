@@ -4,8 +4,8 @@ import 'package:masjid_app/examples/utils/signout_dialog.dart';
 import 'package:masjid_app/examples/data/user_data.dart';
 import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
 
-class DrowerWidgets {
-  Widget appBarDrow(BuildContext context) {
+class DrawerWidgets {
+  Widget buildDrawer(BuildContext context) {
     final displayName = UserData.getDisplayName();
     final currUser = FirebaseAuth.instance.currentUser;
     final userEmail = UserData.getUserEmail();

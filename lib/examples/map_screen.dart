@@ -12,6 +12,7 @@ import 'package:csv/csv.dart';
 import 'package:analog_clock/analog_clock.dart';
 import 'package:masjid_app/examples/data/user_data.dart';
 import 'package:toastification/toastification.dart';
+import 'package:masjid_app/examples/widgets/drawer_widget.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:async' show Future;
 
@@ -24,6 +25,7 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late final YandexMapController _mapController;
+  late TextEditingController searchController;
   GlobalKey mapKey = GlobalKey();
 
   var collection = FirebaseFirestore.instance.collection('masjids');
@@ -31,9 +33,9 @@ class _MapScreenState extends State<MapScreen> {
   late List<MapPoint> items = [];
   late List<Map<String, dynamic>> prayerItems = [];
   bool isLoaded = false;
+  bool isSearchMode = false;
   int? _currentOpenModalIndex;
 
-  late Point _point = Point(latitude: 40.442314, longitude: 71.697144);
   // var _mapZoom = 0.0;
   CameraPosition? _userLocation;
 
@@ -41,9 +43,22 @@ class _MapScreenState extends State<MapScreen> {
       const MapAnimation(type: MapAnimationType.smooth, duration: 2.0);
 
   @override
+  void initState() {
+    super.initState();
+    searchController = TextEditingController();
+  }
+
+  @override
   void dispose() {
     _mapController.dispose();
     super.dispose();
+  }
+
+  List<MapPoint> getFilteredItems(String searchText) {
+    return items
+        .where((item) =>
+            item.name.toLowerCase().contains(searchText.toLowerCase()))
+        .toList();
   }
 
   Future<void> _initLocationLayer() async {
@@ -286,7 +301,52 @@ class _MapScreenState extends State<MapScreen> {
     // _mapController.moveCamera(
     //     CameraUpdate.newCameraPosition(const CameraPosition(target: _point)),
     //     animation: animation);
+    DrawerWidgets drawerWidgets = DrawerWidgets();
+    double listViewHeight = items.length * 65.0;
+    listViewHeight = listViewHeight.clamp(65.0, 207.0);
+
     return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        title: isSearchMode
+            ? TextField(
+                onChanged: (text) {
+                  // print(text);
+                  // if (text.isEmpty) {
+                  //   setState(() {
+                  //     items = items;
+                  //   });
+                  // } else {
+                  //   setState(() {
+                  //     items = getFilteredItems(text);
+                  //   });
+                  // }
+                  setState(() {
+                    items = getFilteredItems(text);
+                  });
+                },
+                controller: searchController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                    hintText: 'Qidirmoq...',
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(color: Colors.black12)),
+                style: const TextStyle(color: Colors.black),
+              )
+            : const FittedBox(child: Text('Masjidlar Takbir Vaqtlari')),
+        actions: [
+          IconButton(
+            icon: isSearchMode
+                ? const Icon(Icons.close)
+                : const Icon(Icons.search),
+            onPressed: () {
+              setState(() {
+                isSearchMode = !isSearchMode;
+              });
+            },
+          ),
+        ],
+      ),
       body: Stack(
         children: [
           YandexMap(
@@ -296,11 +356,6 @@ class _MapScreenState extends State<MapScreen> {
               // await uploadToFirestore();
               // await uploadPrayerTimesToFirestore();
             },
-            // onCameraPositionChanged: (cameraPosition, _, __) {
-            //   setState(() {
-            //     _mapZoom = cameraPosition.zoom;
-            //   });
-            // },
             mapObjects: _getPlacemarkObjects(context),
             onUserLocationAdded: (view) async {
               _userLocation = await _mapController.getUserCameraPosition();
@@ -326,6 +381,29 @@ class _MapScreenState extends State<MapScreen> {
                       .copyWith(fillColor: Colors.blue.withOpacity(0.5)));
             },
           ),
+          isSearchMode
+              ? Positioned(
+                  top: 0,
+                  width: MediaQuery.of(context).size.width,
+                  height: listViewHeight,
+                  child: Container(
+                    color: Colors.white,
+                    child: ListView.builder(
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                            horizontalTitleGap: 3.0,
+                            title: Text(items[index].name),
+                            leading: const Icon(
+                              Icons.location_on_sharp,
+                              size: 32,
+                            ),
+                            onTap: () => cameraMover(
+                                items[index].latitude, items[index].longitude));
+                      },
+                    ),
+                  ))
+              : Container(),
           Positioned(
             bottom: 450.0,
             right: 5,
@@ -354,15 +432,6 @@ class _MapScreenState extends State<MapScreen> {
               child: const Icon(Icons.remove),
             ),
           ),
-          TextButton(
-            onPressed: () async {
-              await _mapController.moveCamera(
-                  CameraUpdate.newCameraPosition(
-                      CameraPosition(target: _point)),
-                  animation: animation);
-            },
-            child: const Text('new'),
-          ),
           Positioned(
             bottom: 40.0,
             right: 5,
@@ -385,7 +454,19 @@ class _MapScreenState extends State<MapScreen> {
           ),
         ],
       ),
+      drawer: drawerWidgets.buildDrawer(context),
     );
+  }
+
+  Future<void> cameraMover(double latitude, double longitude) async {
+    final Point point = Point(latitude: latitude, longitude: longitude);
+    await _mapController
+        .moveCamera(
+            CameraUpdate.newCameraPosition(CameraPosition(target: point)),
+            animation: animation)
+        .then((value) => setState(() {
+              isSearchMode = !isSearchMode;
+            }));
   }
 }
 
@@ -502,8 +583,8 @@ class _ModalBodyViewState extends State<_ModalBodyView> {
                                     ),
                                   ),
                                 );
+                                if (!context.mounted) return;
                                 Navigator.pop(context);
-                                //
                               },
                               icon: const Icon(
                                 Icons.edit_outlined,
@@ -662,10 +743,10 @@ class EditPrayerTimesScreen extends StatefulWidget {
       {super.key, required this.point, required this.prayerTimes});
 
   @override
-  _EditPrayerTimesScreenState createState() => _EditPrayerTimesScreenState();
+  EditPrayerTimesScreenState createState() => EditPrayerTimesScreenState();
 }
 
-class _EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
+class EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
   // Add controllers for the edited timestamps
   late TextEditingController bomdodController;
   late TextEditingController bomdodTakbirController;
