@@ -64,9 +64,10 @@ class EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
       appBar: AppBar(
         title: const FittedBox(child: Text('Namoz Vaqtlarini Yangilash')),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        // keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
