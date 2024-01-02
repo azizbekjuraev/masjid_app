@@ -85,7 +85,6 @@ class _MapScreenState extends State<MapScreen> {
       var prayerData = await prayerCollection.get();
       List<MapPoint> mapPoints = _getMapPoints(data.docs);
       List<Map<String, dynamic>> prayerTimes = _getPrayerTimes(prayerData.docs);
-
       setState(() {
         items = mapPoints;
         originalItems = mapPoints;
@@ -136,7 +135,7 @@ class _MapScreenState extends State<MapScreen> {
       final index = entry.key;
       final point = entry.value;
       return PlacemarkMapObject(
-        mapId: MapObjectId('MapObject $point'),
+        mapId: MapObjectId('MapObject $index'),
         point: Point(latitude: point.latitude, longitude: point.longitude),
         opacity: 1,
         icon: PlacemarkIcon.single(
@@ -157,7 +156,6 @@ class _MapScreenState extends State<MapScreen> {
               return;
             }
           }
-
           showModalBottomSheet(
             enableDrag: true,
             showDragHandle: true,
@@ -306,13 +304,9 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // _mapController.moveCamera(
-    //     CameraUpdate.newCameraPosition(const CameraPosition(target: _point)),
-    //     animation: animation);
     DrawerWidgets drawerWidgets = DrawerWidgets();
     double listViewHeight = items.length * 65.0;
     listViewHeight = listViewHeight.clamp(65.0, 207.0);
-
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -426,6 +420,18 @@ class _MapScreenState extends State<MapScreen> {
                 }
               },
               child: const Icon(Icons.my_location_rounded),
+            ),
+          ),
+          IgnorePointer(
+            ignoring: !isSearchMode,
+            child: GestureDetector(
+              onTap: () {
+                FocusScope.of(context).unfocus();
+                setState(() {
+                  isSearchMode = !isSearchMode;
+                });
+              },
+              child: Container(color: Colors.transparent),
             ),
           ),
           isSearchMode

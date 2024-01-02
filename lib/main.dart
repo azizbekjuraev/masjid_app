@@ -32,30 +32,8 @@ class MainPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // appBar: AppBar(
-      //   title: const FittedBox(child: Text('Masjidlar Takbir Vaqtlari')),
-      //   leading: Builder(
-      //     builder: (context) => IconButton(
-      //       icon: const Icon(Icons.menu),
-      //       onPressed: () {
-      //         // Open the drawer using the new context from Builder
-      //         Scaffold.of(context).openDrawer();
-      //       },
-      //     ),
-      //   ),
-      //   actions: [
-      //     IconButton(
-      //       icon: const Icon(Icons.search),
-      //       onPressed: () {
-      //         // Navigate to the search page or perform search actions here
-      //         Navigator.pushNamed(context, './search-masjids/');
-      //       },
-      //     ),
-      //   ],
-      // ),
+    return const Scaffold(
       body: MapScreen(),
-      // drawer: DrawerWidgets().appBarDrow(context),
     );
   }
 }
