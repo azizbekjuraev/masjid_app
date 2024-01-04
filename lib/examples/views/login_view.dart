@@ -35,8 +35,6 @@ class _LoginViewState extends State<LoginView> {
       final String email = _email.text.trim();
       final String password = _password.text;
 
-      print(email);
-
       if (email.isEmpty) {
         showAlertDialog(context, 'Xato', 'Elektron pochtangizni kiriting');
         return;
@@ -156,6 +154,7 @@ class _LoginViewState extends State<LoginView> {
                                   borderRadius: BorderRadius.circular(12.0),
                                   boxShadow: lowModeShadow,
                                 ));
+                        // Navigator.pushNamed(context, './main/');
                       },
                       child: const Text('Kirish'),
                     ),

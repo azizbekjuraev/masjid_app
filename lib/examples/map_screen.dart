@@ -7,7 +7,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:csv/csv.dart';
-import 'package:masjid_app/examples/widgets/drawer_widget.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:async' show Future;
 
@@ -47,11 +46,11 @@ class _MapScreenState extends State<MapScreen> {
     searchController = TextEditingController();
   }
 
-  @override
-  void dispose() {
-    _mapController.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   _mapController.dispose();
+  //   super.dispose();
+  // }
 
   List<MapPoint> getFilteredItems(String searchText) {
     if (searchText.isEmpty) {
@@ -304,7 +303,6 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    DrawerWidgets drawerWidgets = DrawerWidgets();
     double listViewHeight = items.length * 65.0;
     listViewHeight = listViewHeight.clamp(65.0, 207.0);
     return Scaffold(
@@ -459,7 +457,6 @@ class _MapScreenState extends State<MapScreen> {
               : Container(),
         ],
       ),
-      drawer: drawerWidgets.buildDrawer(context),
     );
   }
 

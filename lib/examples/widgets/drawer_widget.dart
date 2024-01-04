@@ -1,14 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:masjid_app/examples/data/user_data.dart';
 import 'package:flutter/material.dart';
 import 'package:masjid_app/examples/utils/signout_dialog.dart';
-import 'package:masjid_app/examples/data/user_data.dart';
 import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
 
 class DrawerWidgets {
   Widget buildDrawer(BuildContext context) {
-    final displayName = UserData.getDisplayName();
-    final currUser = FirebaseAuth.instance.currentUser;
-    final userEmail = UserData.getUserEmail();
+    // final displayName = UserData.getDisplayName();
+    // final currUser = FirebaseAuth.instance.currentUser;
+    // final userEmail = UserData.getUserEmail();
 
     return Drawer(
       child: ListView(
@@ -22,26 +22,6 @@ class DrawerWidgets {
                   borderRadius: BorderRadius.circular(10.0),
                 ),
                 child: const Text('Hush kelibsiz!')),
-            // accountEmail: Row(children: [
-            //   (currUser?.email != null)
-            //       ? Container(
-            //           padding: const EdgeInsets.all(8.0),
-            //           decoration: BoxDecoration(
-            //             color: Colors.black87,
-            //             borderRadius: BorderRadius.circular(10.0),
-            //           ),
-            //           child: Text(currUser?.email as String))
-            //       : Container(
-            //           padding: const EdgeInsets.all(8.0),
-            //           decoration: BoxDecoration(
-            //             color: Colors.black87,
-            //             borderRadius: BorderRadius.circular(10.0),
-            //           ),
-            //           child: const Text(
-            //             'Tizimga kirmagansiz!',
-            //           ),
-            //         ),
-            // ]),
             accountEmail: null,
             currentAccountPicture: CircleAvatar(
               child: ClipOval(
@@ -91,7 +71,7 @@ class DrawerWidgets {
           // ),
           ListTile(
             leading: const Icon(Icons.login),
-            title: const Text('Tizimga Kirish'),
+            title: const Text('Tizimga kirish'),
             onTap: () {
               Navigator.pushNamed(context, './login/')
                   .then((value) => Navigator.of(context).pop());
@@ -110,7 +90,7 @@ class DrawerWidgets {
           // ),
           // const Divider(),
           ListTile(
-            title: const Text('Tizimdan Chiqish'),
+            title: const Text('Tizimdan chiqish'),
             leading: const Icon(Icons.exit_to_app),
             onTap: () async {
               try {
@@ -121,6 +101,11 @@ class DrawerWidgets {
             },
           ),
           const Divider(),
+          ListTile(
+            leading: const Icon(Icons.add_location_alt_outlined),
+            title: const Text("Masjid qo'shish"),
+            onTap: () {},
+          ),
         ],
       ),
     );

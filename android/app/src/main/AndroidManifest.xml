@@ -3,7 +3,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <application
-        android:label="MasjidGo"
+        android:label="MasjidGO"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
 

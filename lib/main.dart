@@ -12,6 +12,8 @@ import 'package:masjid_app/examples/views/login_view.dart';
 import 'package:masjid_app/examples/data/user_data.dart';
 import 'package:masjid_app/examples/search_masjids.dart';
 import 'package:masjid_app/examples/clusterized_placemark_collection_page.dart';
+import 'package:masjid_app/examples/views/home_view.dart';
+import 'package:masjid_app/examples/views/settings_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,19 +23,61 @@ void main() async {
       home: const MainPage(),
       debugShowCheckedModeBanner: false,
       routes: {
-        './login/': (context) => const LoginView(),
         './main/': (context) => const MainPage(),
+        './login/': (context) => const LoginView(),
+        './map-screen/': (context) => const MapScreen(),
         './search-masjids/': (context) => const SearchMasjids(),
+        './home-view/': (context) => const HomeView(),
       }));
 }
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
   @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  int _selectedIndex = 0;
+
+  static const List<Widget> _widgetOptions = <Widget>[
+    HomeView(),
+    MapScreen(),
+    SettingsView(),
+  ];
+
+  @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: MapScreen(),
+    return Scaffold(
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _widgetOptions,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        showUnselectedLabels: false,
+        type: BottomNavigationBarType.fixed,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Asosiy',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.location_on_outlined),
+            label: 'Masjidlar',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Sozlamalar',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+      ),
     );
   }
 }
