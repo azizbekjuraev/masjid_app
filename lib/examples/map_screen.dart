@@ -46,11 +46,11 @@ class _MapScreenState extends State<MapScreen> {
     searchController = TextEditingController();
   }
 
-  // @override
-  // void dispose() {
-  //   _mapController.dispose();
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    _mapController.dispose();
+    super.dispose();
+  }
 
   List<MapPoint> getFilteredItems(String searchText) {
     if (searchText.isEmpty) {
