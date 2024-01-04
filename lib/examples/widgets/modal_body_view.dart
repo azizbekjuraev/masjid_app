@@ -1,4 +1,3 @@
-import 'package:analog_clock/analog_clock.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -8,6 +7,8 @@ import 'package:masjid_app/examples/map_point.dart';
 import 'package:masjid_app/examples/map_screen.dart';
 import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
 import 'package:masjid_app/examples/widgets/edit_prayer_times_screen.dart';
+import 'package:masjid_app/examples/utils/analog_clock_builder.dart';
+import 'package:masjid_app/examples/widgets/prayer_time_table.dart';
 
 class ModalBodyView extends StatefulWidget {
   const ModalBodyView(
@@ -67,54 +68,22 @@ class _ModalBodyViewState extends State<ModalBodyView> {
               for (var time in widget.prayerTimes)
                 Column(
                   children: [
-                    const Text(
-                      'Azon Vaqtlari',
-                      style: TextStyle(color: Colors.redAccent),
+                    PrayerTimeTable(
+                      prayerTimes: widget.prayerTimes,
+                      textStyle: myTextStyle,
+                      title: 'Azon Vaqtlari',
+                      titleColor: Colors.redAccent,
+                      borderColor: Colors.black,
+                      buildCells: buildAzonPrayerTimeCells,
                     ),
-                    const SizedBox(height: 5),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10.0, vertical: 1.0),
-                      child: Table(
-                        defaultVerticalAlignment:
-                            TableCellVerticalAlignment.bottom,
-                        border: TableBorder.all(width: 0, color: Colors.black),
-                        children: [
-                          TableRow(
-                            children: [
-                              for (var time in widget.prayerTimes)
-                                ..._buildAzonPrayerTimeCells(time, myTextStyle),
-                            ],
-                          ),
-                        ],
-                      ),
+                    PrayerTimeTable(
+                      prayerTimes: widget.prayerTimes,
+                      textStyle: myTextStyle,
+                      title: 'Takbir Vaqtlari',
+                      titleColor: Colors.blueAccent,
+                      borderColor: Colors.black,
+                      buildCells: buildTakbirPrayerTimeCells,
                     ),
-                    const SizedBox(height: 5),
-
-                    const Text(
-                      'Takbir Vaqtlari',
-                      style: TextStyle(color: Colors.blueAccent),
-                    ),
-                    const SizedBox(height: 5),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10.0, vertical: 1.0),
-                      child: Table(
-                        defaultVerticalAlignment:
-                            TableCellVerticalAlignment.bottom,
-                        border: TableBorder.all(width: 0, color: Colors.black),
-                        children: [
-                          TableRow(
-                            children: [
-                              for (var time in widget.prayerTimes)
-                                ..._buildTakbirPrayerTimeCells(
-                                    time, myTextStyle),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 5),
                     //Yangilash
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -168,81 +137,6 @@ class _ModalBodyViewState extends State<ModalBodyView> {
           ),
         ),
       ),
-    );
-  }
-
-  List<Widget> _buildAzonPrayerTimeCells(
-      Map<String, dynamic> time, TextStyle myTextStyle) {
-    return [
-      for (var prayer in ['Bomdod', 'Peshin', 'Asr', 'Shom', 'Xufton'])
-        ..._buildTableCell(prayer, time[prayer.toLowerCase()]!, myTextStyle),
-    ];
-  }
-
-  String removeSuffix(String prayer) {
-    return prayer.replaceAll('_Takbir', '');
-  }
-
-  List<Widget> _buildTakbirPrayerTimeCells(
-      Map<String, dynamic> time, TextStyle myTextStyle) {
-    return [
-      for (var prayer in [
-        'Bomdod_Takbir',
-        'Peshin_Takbir',
-        'Asr_Takbir',
-        'Shom_Takbir',
-        'Xufton_Takbir'
-      ])
-        Column(
-          children: [
-            FittedBox(
-              child: Text(
-                removeSuffix(prayer),
-                style: myTextStyle,
-              ),
-            ),
-            _buildAnalogClock(time[prayer.toLowerCase()]!),
-          ],
-        ),
-    ];
-  }
-
-  List<Widget> _buildTableCell(
-      String label, String time, TextStyle myTextStyle) {
-    return [
-      Column(
-        children: [
-          FittedBox(
-            child: Text(
-              label,
-              style: myTextStyle,
-            ),
-          ),
-          _buildAnalogClock(time),
-        ],
-      ),
-    ];
-  }
-
-  Widget _buildAnalogClock(String time) {
-    String dateTimeString = "2023-01-01 $time";
-
-    return AnalogClock(
-      width: 70,
-      height: 70,
-      decoration: const BoxDecoration(
-        color: Colors.transparent,
-      ),
-      hourHandColor: Colors.black,
-      minuteHandColor: Colors.black,
-      numberColor: Colors.black,
-      showNumbers: true,
-      showSecondHand: false,
-      textScaleFactor: 2.4,
-      showTicks: true,
-      showDigitalClock: false,
-      showAllNumbers: true,
-      datetime: DateTime.parse(dateTimeString),
     );
   }
 

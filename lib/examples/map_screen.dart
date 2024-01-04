@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:masjid_app/examples/utils/get_prayer_times.dart';
 import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
+// ignore: unused_import
+import 'package:masjid_app/examples/utils/upload_masjids_to_firestore.dart';
+// ignore: unused_import
+import 'package:masjid_app/examples/utils/upload_prayer_times_to_firestore.dart';
 import 'package:masjid_app/examples/widgets/modal_body_view.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 import 'package:masjid_app/examples/map_point.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
-import 'package:csv/csv.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'dart:async' show Future;
 
 typedef LocationLayerInitCallback = Future<void> Function();
@@ -23,7 +25,6 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   late final YandexMapController _mapController;
   late TextEditingController searchController;
-  GlobalKey mapKey = GlobalKey();
 
   var collection = FirebaseFirestore.instance.collection('masjids');
   var prayerCollection = FirebaseFirestore.instance.collection('prayer_time');
@@ -174,131 +175,17 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   List<Map<String, String>> _getPrayerTimesForLocation(MapPoint point) {
-    var prayerTimes = prayerItems.where((prayerTime) {
-      DocumentReference masjidRef = prayerTime['masjid'];
-      String prayerTimeMasjidId = masjidRef.id;
-      return prayerTimeMasjidId == point.documentId;
-    }).toList();
-
-    var formattedPrayerTimes = prayerTimes
-        .map((prayerTime) => {
-              'bomdod': _formatTimestamp(prayerTime['bomdod']),
-              'bomdod_takbir': _formatTimestamp(prayerTime['bomdod_takbir']),
-              'peshin': _formatTimestamp(prayerTime['peshin']),
-              'peshin_takbir': _formatTimestamp(prayerTime['peshin_takbir']),
-              'asr': _formatTimestamp(prayerTime['asr']),
-              'asr_takbir': _formatTimestamp(prayerTime['asr_takbir']),
-              'shom': _formatTimestamp(prayerTime['shom']),
-              'shom_takbir': _formatTimestamp(prayerTime['shom_takbir']),
-              'xufton': _formatTimestamp(prayerTime['xufton']),
-              'xufton_takbir': _formatTimestamp(prayerTime['xufton_takbir']),
-              'created_at': _formatFullTimestamp(prayerTime['created_at']),
-            })
-        .toList();
-    return formattedPrayerTimes;
+    print(point);
+    return getPrayerTimesForLocation(
+        originalItems, prayerItems, point.documentId);
   }
 
-  String _formatTimestamp(Timestamp? timestamp) {
-    if (timestamp == null) {
-      return 'N/A';
-    } else {
-      var formatter = DateFormat('hh:mm'
-          '');
-      return formatter.format(timestamp.toDate());
-    }
+  String formatTimestamp(Timestamp? timestamp) {
+    return formatTimestamp(timestamp);
   }
 
-  String _formatFullTimestamp(Timestamp? timestamp) {
-    if (timestamp == null) {
-      return 'N/A';
-    } else {
-      var formatter = DateFormat('yyyy-MM-dd hh:mm');
-      return formatter.format(timestamp.toDate());
-    }
-  }
-
-  Future<void> uploadToFirestore() async {
-    final CollectionReference masjids =
-        FirebaseFirestore.instance.collection('masjids');
-    final myData = await rootBundle.loadString("assets/Masjids.csv");
-    List<List<dynamic>> csvTable =
-        const CsvToListConverter(eol: '\n').convert(myData);
-    List<List<dynamic>> data = csvTable;
-
-    for (var i = 0; i < data.length; i++) {
-      var latString = data[i][1]?.toString();
-      var longString = data[i][2]?.toString();
-
-      latString = latString?.replaceAll('° N', '');
-      longString = longString?.replaceAll('° E', '');
-
-      var lat = double.tryParse(latString!) ?? 0.0;
-      var long = double.tryParse(longString!) ?? 0.0;
-
-      var record = {
-        'name': data[i][0],
-        'coords': GeoPoint(lat, long),
-      };
-
-      var existingDocs = await masjids
-          .where('name', isEqualTo: data[i][0])
-          .where('coords', isEqualTo: GeoPoint(lat, long))
-          .get();
-
-      if (existingDocs.docs.isEmpty) {
-        await masjids.add(record);
-      }
-    }
-  }
-
-  Future<void> uploadPrayerTimesToFirestore() async {
-    final masjids = FirebaseFirestore.instance.collection('masjids');
-    final masjidDocuments = await masjids.get();
-
-    for (var masjidDocument in masjidDocuments.docs) {
-      final masjidRef = masjidDocument.reference;
-
-      final existingPrayerTimes = await FirebaseFirestore.instance
-          .collection('prayer_time')
-          .where('masjid', isEqualTo: masjidRef)
-          .get();
-
-      if (existingPrayerTimes.docs.isNotEmpty) {
-        continue;
-      }
-      final bomdodTime = Timestamp.fromDate(DateTime(2023, 11, 18, 5, 45, 0));
-      final bomdodTakbirTime =
-          Timestamp.fromDate(DateTime(2023, 11, 18, 5, 30, 0));
-      final peshinTime = Timestamp.fromDate(DateTime(2023, 11, 18, 13, 14, 57));
-      final peshinTakbirTime =
-          Timestamp.fromDate(DateTime(2023, 11, 18, 13, 22, 29));
-      final asrTime = Timestamp.fromDate(DateTime(2023, 11, 18, 15, 47, 24));
-      final asrTakbirTime =
-          Timestamp.fromDate(DateTime(2023, 11, 18, 15, 46, 31));
-      final shomTime = Timestamp.fromDate(DateTime(2023, 11, 18, 17, 25, 44));
-      final shomTakbirTime =
-          Timestamp.fromDate(DateTime(2023, 11, 18, 17, 53, 4));
-      final xuftonTime = Timestamp.fromDate(DateTime(2023, 11, 18, 18, 43, 44));
-      final xuftonTakbirTime =
-          Timestamp.fromDate(DateTime(2023, 11, 18, 18, 50, 6));
-      final createdAt = Timestamp.fromDate(DateTime(2023, 11, 18, 1, 16, 15));
-
-      // Create a prayer time document
-      await FirebaseFirestore.instance.collection('prayer_time').add({
-        'masjid': masjidRef, // Reference to the masjid document
-        'bomdod': bomdodTime,
-        'bomdod_takbir': bomdodTakbirTime,
-        'peshin': peshinTime,
-        'peshin_takbir': peshinTakbirTime,
-        'asr': asrTime,
-        'asr_takbir': asrTakbirTime,
-        'shom': shomTime,
-        'shom_takbir': shomTakbirTime,
-        'xufton': xuftonTime,
-        'xufton_takbir': xuftonTakbirTime,
-        'created_at': createdAt,
-      });
-    }
+  String formatFullTimestamp(Timestamp? timestamp) {
+    return formatFullTimestamp(timestamp);
   }
 
   @override
@@ -344,7 +231,7 @@ class _MapScreenState extends State<MapScreen> {
             onMapCreated: (controller) async {
               _mapController = controller;
               await _initLocationLayer();
-              // await uploadToFirestore();
+              // await uploadMasjidsToFirestore();
               // await uploadPrayerTimesToFirestore();
             },
             mapObjects: _getPlacemarkObjects(context),
