@@ -5,6 +5,7 @@ import 'package:map_launcher/map_launcher.dart';
 import 'package:masjid_app/examples/data/user_data.dart';
 import 'package:masjid_app/examples/map_point.dart';
 import 'package:masjid_app/examples/map_screen.dart';
+import 'package:masjid_app/examples/styles/app_styles.dart';
 import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
 import 'package:masjid_app/examples/widgets/edit_prayer_times_screen.dart';
 import 'package:masjid_app/examples/utils/analog_clock_builder.dart';
@@ -19,7 +20,6 @@ class ModalBodyView extends StatefulWidget {
   final MapPoint point;
   final List<Map<String, String>> prayerTimes;
   final LocationLayerInitCallback onLocationLayerInit;
-
   @override
   State<ModalBodyView> createState() => _ModalBodyViewState();
 }
@@ -58,6 +58,8 @@ class _ModalBodyViewState extends State<ModalBodyView> {
                         onPressed: () async {
                           await _openMapsSheet(context);
                         },
+                        backgroundColor: Colors.green.shade700,
+                        foregroundColor: Colors.yellow,
                         child: const Icon(Icons.location_on_outlined),
                       ),
                     ),
@@ -118,13 +120,16 @@ class _ModalBodyViewState extends State<ModalBodyView> {
                           ),
                           Column(
                             children: [
-                              const Text(
+                              Text(
                                 'Yangilangan sana:',
-                                style: TextStyle(color: Colors.deepPurple),
+                                style: TextStyle(
+                                    color: AppStyles.backgroundColorGreen700),
                               ),
                               Text(
                                 '${time['created_at']}',
-                                style: const TextStyle(fontSize: 15),
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    color: AppStyles.backgroundColorGreen700),
                               ),
                             ],
                           )

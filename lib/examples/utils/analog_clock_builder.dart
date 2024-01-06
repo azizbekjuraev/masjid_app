@@ -31,7 +31,7 @@ List<Widget> buildTakbirPrayerTimeCells(
               style: myTextStyle,
             ),
           ),
-          buildAnalogClock(time[prayer.toLowerCase()]!),
+          buildAnalogClock(time[prayer.toLowerCase()]!, Colors.black),
         ],
       ),
   ];
@@ -47,13 +47,13 @@ List<Widget> buildTableCell(String label, String time, TextStyle myTextStyle) {
             style: myTextStyle,
           ),
         ),
-        buildAnalogClock(time),
+        buildAnalogClock(time, Colors.black),
       ],
     ),
   ];
 }
 
-Widget buildAnalogClock(String time) {
+Widget buildAnalogClock(String time, Color clockColor) {
   String dateTimeString = "2023-01-01 $time";
 
   return AnalogClock(
@@ -62,9 +62,9 @@ Widget buildAnalogClock(String time) {
     decoration: const BoxDecoration(
       color: Colors.transparent,
     ),
-    hourHandColor: Colors.black,
-    minuteHandColor: Colors.black,
-    numberColor: Colors.black,
+    hourHandColor: clockColor,
+    minuteHandColor: clockColor,
+    numberColor: clockColor,
     showNumbers: true,
     showSecondHand: false,
     textScaleFactor: 2.4,

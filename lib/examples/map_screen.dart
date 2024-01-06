@@ -1,4 +1,6 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:masjid_app/examples/styles/app_styles.dart';
 import 'package:masjid_app/examples/utils/get_prayer_times.dart';
 import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
 // ignore: unused_import
@@ -175,7 +177,6 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   List<Map<String, String>> _getPrayerTimesForLocation(MapPoint point) {
-    print(point);
     return getPrayerTimesForLocation(
         originalItems, prayerItems, point.documentId);
   }
@@ -263,8 +264,8 @@ class _MapScreenState extends State<MapScreen> {
             bottom: 450.0,
             right: 5,
             child: FloatingActionButton.small(
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black,
+              backgroundColor: AppStyles.backgroundColorWhite,
+              foregroundColor: AppStyles.foregroundColorBlack,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
               onPressed: () async {
@@ -277,8 +278,8 @@ class _MapScreenState extends State<MapScreen> {
             bottom: 400.0,
             right: 5,
             child: FloatingActionButton.small(
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black,
+              backgroundColor: AppStyles.backgroundColorWhite,
+              foregroundColor: AppStyles.foregroundColorBlack,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
               onPressed: () async {
@@ -304,6 +305,8 @@ class _MapScreenState extends State<MapScreen> {
                           type: MapAnimationType.linear, duration: 0.6));
                 }
               },
+              backgroundColor: AppStyles.backgroundColorGreen700,
+              foregroundColor: AppStyles.foregroundColorYellow,
               child: const Icon(Icons.my_location_rounded),
             ),
           ),
@@ -325,7 +328,7 @@ class _MapScreenState extends State<MapScreen> {
                   width: MediaQuery.of(context).size.width,
                   height: listViewHeight,
                   child: Container(
-                    color: Colors.white,
+                    color: AppStyles.backgroundColorWhite,
                     child: ListView.builder(
                       itemCount: items.length,
                       itemBuilder: (context, index) {
@@ -359,4 +362,23 @@ class _MapScreenState extends State<MapScreen> {
     //buni hali korib chiqaman!
     await _initLocationLayer();
   }
+}
+
+double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+  const R = 6371.0; // Radius of the Earth in kilometers
+
+  double dLat = radians(lat2 - lat1);
+  double dLon = radians(lon2 - lon1);
+
+  double a = sin(dLat / 2) * sin(dLat / 2) +
+      cos(radians(lat1)) * cos(radians(lat2)) * sin(dLon / 2) * sin(dLon / 2);
+  double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+  double distance = R * c; // Distance in kilometers
+
+  return distance;
+}
+
+double radians(double degrees) {
+  return degrees * pi / 180;
 }

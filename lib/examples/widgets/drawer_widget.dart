@@ -1,6 +1,7 @@
 // import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:masjid_app/examples/data/user_data.dart';
 import 'package:flutter/material.dart';
+import 'package:masjid_app/examples/styles/app_styles.dart';
 import 'package:masjid_app/examples/utils/signout_dialog.dart';
 import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
 
@@ -18,10 +19,13 @@ class DrawerWidgets {
             accountName: Container(
                 padding: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
-                  color: Colors.black87,
+                  color: AppStyles.backgroundColorGreen900,
                   borderRadius: BorderRadius.circular(10.0),
                 ),
-                child: const Text('Hush kelibsiz!')),
+                child: const Text(
+                  'Hush kelibsiz!',
+                  style: AppStyles.textStyleYellow,
+                )),
             accountEmail: null,
             currentAccountPicture: CircleAvatar(
               child: ClipOval(
@@ -41,9 +45,9 @@ class DrawerWidgets {
                 },
               ),
             ],
-            decoration: const BoxDecoration(
-              color: Colors.blue,
-              image: DecorationImage(
+            decoration: BoxDecoration(
+              color: AppStyles.backgroundColorGreen700,
+              image: const DecorationImage(
                 fit: BoxFit.fill,
                 image: NetworkImage(
                     'https://mybayutcdn.bayut.com/mybayut/wp-content/uploads/Agency-Posts-Cover-B-01.jpg'),
