@@ -2,13 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:masjid_app/examples/map_point.dart';
 
-List<Map<String, String>> getPrayerTimesForLocation(List<MapPoint> items,
+List<Map<String, String>> getPrayerTimesForLocation(
     List<Map<String, dynamic>> prayerItems, String documentId) {
   var prayerTimes = prayerItems.where((prayerTime) {
     DocumentReference masjidRef = prayerTime['masjid'];
     String prayerTimeMasjidId = masjidRef.id;
     return prayerTimeMasjidId == documentId;
   }).toList();
+
+  print(prayerTimes);
 
   var formattedPrayerTimes = prayerTimes
       .map((prayerTime) => {

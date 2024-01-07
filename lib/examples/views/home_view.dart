@@ -85,22 +85,22 @@ class _HomeViewState extends State<HomeView> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            PrayerTimes(
+                            CitiesPrayerTimes(
                                 prayerName: "Tong",
                                 prayerTimesData?.times?.tongSaharlik! ?? ''),
-                            PrayerTimes(
+                            CitiesPrayerTimes(
                                 prayerName: 'Quyosh',
                                 prayerTimesData?.times?.quyosh! ?? ''),
-                            PrayerTimes(
+                            CitiesPrayerTimes(
                                 prayerName: 'Peshin',
                                 prayerTimesData?.times?.peshin! ?? ''),
-                            PrayerTimes(
+                            CitiesPrayerTimes(
                                 prayerName: 'Asr',
                                 prayerTimesData?.times?.asr! ?? ''),
-                            PrayerTimes(
+                            CitiesPrayerTimes(
                                 prayerName: 'Shom',
                                 prayerTimesData?.times?.shomIftor! ?? ''),
-                            PrayerTimes(
+                            CitiesPrayerTimes(
                                 prayerName: 'Xufton',
                                 prayerTimesData?.times?.hufton! ?? ''),
                           ],
@@ -212,11 +212,11 @@ class _HomeViewState extends State<HomeView> {
   }
 }
 
-class PrayerTimes extends StatelessWidget {
+class CitiesPrayerTimes extends StatelessWidget {
   final String itemName;
   final String prayerName;
 
-  const PrayerTimes(this.itemName, {super.key, required this.prayerName});
+  const CitiesPrayerTimes(this.itemName, {super.key, required this.prayerName});
 
   @override
   Widget build(BuildContext context) {

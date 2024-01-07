@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:masjid_app/examples/map_point.dart';
 import 'package:masjid_app/examples/map_screen.dart';
+import 'package:masjid_app/examples/styles/app_styles.dart';
 import 'package:toastification/toastification.dart';
 
 class EditPrayerTimesScreen extends StatefulWidget {
@@ -110,7 +111,10 @@ class EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
                           ))
                       .then((value) => Navigator.pop(context));
                 },
-                child: const Text('Tayyor'),
+                child: Text(
+                  'Tayyor',
+                  style: AppStyles.textStyleGreen,
+                ),
               ),
             ],
           ),

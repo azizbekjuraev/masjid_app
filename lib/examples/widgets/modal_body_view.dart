@@ -31,7 +31,6 @@ class _ModalBodyViewState extends State<ModalBodyView> {
     double dynamicFontSize = screenWidth * 0.04;
     final currUser = FirebaseAuth.instance.currentUser;
     final userEmail = UserData.getUserEmail();
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: InteractiveViewer(
@@ -58,8 +57,8 @@ class _ModalBodyViewState extends State<ModalBodyView> {
                         onPressed: () async {
                           await _openMapsSheet(context);
                         },
-                        backgroundColor: Colors.green.shade700,
-                        foregroundColor: Colors.yellow,
+                        backgroundColor: AppStyles.backgroundColorGreen700,
+                        foregroundColor: AppStyles.foregroundColorYellow,
                         child: const Icon(Icons.location_on_outlined),
                       ),
                     ),
@@ -74,16 +73,16 @@ class _ModalBodyViewState extends State<ModalBodyView> {
                       prayerTimes: widget.prayerTimes,
                       textStyle: myTextStyle,
                       title: 'Azon Vaqtlari',
-                      titleColor: Colors.redAccent,
-                      borderColor: Colors.black,
+                      titleColor: AppStyles.foregroundColorRed,
+                      borderColor: AppStyles.backgroundColorGreen700,
                       buildCells: buildAzonPrayerTimeCells,
                     ),
                     PrayerTimeTable(
                       prayerTimes: widget.prayerTimes,
                       textStyle: myTextStyle,
                       title: 'Takbir Vaqtlari',
-                      titleColor: Colors.blueAccent,
-                      borderColor: Colors.black,
+                      titleColor: AppStyles.foregroundColorBlue,
+                      borderColor: AppStyles.backgroundColorGreen700,
                       buildCells: buildTakbirPrayerTimeCells,
                     ),
                     //Yangilash
@@ -96,6 +95,10 @@ class _ModalBodyViewState extends State<ModalBodyView> {
                             visible: currUser?.email == userEmail &&
                                 currUser?.email != null,
                             child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                  side: BorderSide(
+                                      color:
+                                          AppStyles.backgroundColorGreen700)),
                               onPressed: () async {
                                 await Navigator.push(
                                   context,
@@ -111,25 +114,28 @@ class _ModalBodyViewState extends State<ModalBodyView> {
                                 if (!context.mounted) return;
                                 Navigator.pop(context);
                               },
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.edit_outlined,
                                 size: 15,
+                                color: AppStyles.backgroundColorGreen700,
                               ),
-                              label: const Text('Yangilash'),
+                              label: Text(
+                                'Yangilash',
+                                style: TextStyle(
+                                    color: AppStyles.backgroundColorGreen700),
+                              ),
                             ),
                           ),
                           Column(
                             children: [
-                              Text(
+                              const Text(
                                 'Yangilangan sana:',
-                                style: TextStyle(
-                                    color: AppStyles.backgroundColorGreen700),
                               ),
                               Text(
                                 '${time['created_at']}',
-                                style: TextStyle(
-                                    fontSize: 15,
-                                    color: AppStyles.backgroundColorGreen700),
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                ),
                               ),
                             ],
                           )

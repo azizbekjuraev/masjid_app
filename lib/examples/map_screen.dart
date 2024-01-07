@@ -177,8 +177,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   List<Map<String, String>> _getPrayerTimesForLocation(MapPoint point) {
-    return getPrayerTimesForLocation(
-        originalItems, prayerItems, point.documentId);
+    return getPrayerTimesForLocation(prayerItems, point.documentId);
   }
 
   String formatTimestamp(Timestamp? timestamp) {
@@ -259,6 +258,14 @@ class _MapScreenState extends State<MapScreen> {
                   accuracyCircle: view.accuracyCircle
                       .copyWith(fillColor: Colors.blue.withOpacity(0.5)));
             },
+          ),
+          FloatingActionButton(
+            tooltip: 'Find Closest Masjid',
+            onPressed: () {
+              _moveToClosestMasjid();
+            },
+            // Customize as needed
+            child: const Icon(Icons.location_searching),
           ),
           Positioned(
             bottom: 450.0,
@@ -362,6 +369,65 @@ class _MapScreenState extends State<MapScreen> {
     //buni hali korib chiqaman!
     await _initLocationLayer();
   }
+
+  void _moveToClosestMasjid() async {
+    if (_userLocation != null) {
+      // Get the closest masjid to the user's location
+      MapPoint closestMasjid = findClosestMasjid(
+        _userLocation!.target.latitude,
+        _userLocation!.target.longitude,
+        items,
+      );
+
+      // Move the camera to the closest masjid's location
+      // await _mapController.moveCamera(
+      //   CameraUpdate.newCameraPosition(
+      //     CameraPosition(
+      //       target: Point(
+      //         latitude: closestMasjid.latitude,
+      //         longitude: closestMasjid.longitude,
+      //       ),
+      //     ),
+      //   ),
+      //   animation:
+      //       const MapAnimation(type: MapAnimationType.smooth, duration: 2.0),
+      // );
+
+      // Get the prayer times for the closest masjid
+      print(closestMasjid);
+      List<Map<String, String>> prayerTimes =
+          _getPrayerTimesForLocation(closestMasjid);
+
+      // Print prayer times in the console
+      print('Prayer Times for ${closestMasjid.name}:');
+      print(prayerTimes);
+    } else {
+      // Handle the case when user location is not available
+      print('User location not available');
+    }
+  }
+}
+
+MapPoint findClosestMasjid(
+    double userLatitude, double userLongitude, List<MapPoint> masjids) {
+  double minDistance = double.infinity;
+  MapPoint closestMasjid = masjids.first;
+
+  for (MapPoint masjid in masjids) {
+    double distance = calculateDistance(
+      userLatitude,
+      userLongitude,
+      masjid.latitude,
+      masjid.longitude,
+    );
+
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestMasjid = masjid;
+    }
+  }
+
+  return closestMasjid;
 }
 
 double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
