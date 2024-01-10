@@ -1,31 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:toastification/toastification.dart';
 
-void showAlertDialog(BuildContext context, String title, Object content,
-    {bool showProgress = false}) {
-  showDialog(
+void showAlertDialog(BuildContext context, String content,
+    {bool showProgress = false,
+    String title = "Xato",
+    ToastificationType toastType = ToastificationType.error,
+    EdgeInsets margin = const EdgeInsets.only(top: 25.0),
+    Alignment toastAlignment = Alignment.topCenter}) {
+  toastification.show(
+    margin: margin,
     context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text(title),
-        content: showProgress
-            ? Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 8),
-                  Text(content as String),
-                ],
-              )
-            : Text(content as String),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context, rootNavigator: true).pop(context);
-            },
-            child: const Text('OK'),
-          ),
-        ],
+    type: toastType,
+    style: ToastificationStyle.flat,
+    title: title,
+    description: content,
+    alignment: toastAlignment,
+    autoCloseDuration: const Duration(seconds: 4),
+    showProgressBar: showProgress,
+    animationBuilder: (
+      context,
+      animation,
+      alignment,
+      child,
+    ) {
+      return FadeTransition(
+        opacity: animation,
+        child: child,
       );
     },
+    borderRadius: BorderRadius.circular(12.0),
+    boxShadow: highModeShadow,
   );
 }

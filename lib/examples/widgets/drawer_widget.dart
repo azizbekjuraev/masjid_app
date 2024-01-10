@@ -1,15 +1,32 @@
-// import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:masjid_app/examples/data/user_data.dart';
 import 'package:flutter/material.dart';
 import 'package:masjid_app/examples/styles/app_styles.dart';
 import 'package:masjid_app/examples/utils/signout_dialog.dart';
 import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
+import 'package:provider/provider.dart';
+
+class CurrentUserProvider extends ChangeNotifier {
+  User? _currentUser;
+
+  User? get currentUser => _currentUser;
+
+  void setCurrentUser(User? user) {
+    _currentUser = user;
+    notifyListeners();
+  }
+}
 
 class DrawerWidgets {
   Widget buildDrawer(BuildContext context) {
     // final displayName = UserData.getDisplayName();
-    // final currUser = FirebaseAuth.instance.currentUser;
     // final userEmail = UserData.getUserEmail();
+    // final currUser = FirebaseAuth.instance.currentUser;
+    // print(currUser);
+
+    final currentUserProvider = Provider.of<CurrentUserProvider>(context);
+    final currUser = currentUserProvider.currentUser;
+    print(currUser);
 
     return Drawer(
       child: ListView(
@@ -54,56 +71,27 @@ class DrawerWidgets {
               ),
             ),
           ),
-          // ListTile(
-          //   leading: const Icon(Icons.favorite),
-          //   title: const Text('Favorites'),
-          //   onTap: () {},
-          // ),
-          // ListTile(
-          //   leading: const Icon(Icons.person),
-          //   title: const Text('Friends'),
-          //   onTap: () {},
-          // ),
-          // ListTile(
-          //   leading: const Icon(Icons.share),
-          //   title: const Text('Share'),
-          //   onTap: () {},
-          // ),
-          // const ListTile(
-          //   leading: Icon(Icons.notifications),
-          //   title: Text('Request'),
-          // ),
-          ListTile(
-            leading: const Icon(Icons.login),
-            title: const Text('Tizimga kirish'),
-            onTap: () {
-              Navigator.pushNamed(context, './login/')
-                  .then((value) => Navigator.of(context).pop());
-            },
-          ),
-          // const Divider(),
-          // ListTile(
-          //   leading: const Icon(Icons.settings),
-          //   title: const Text('Settings'),
-          //   onTap: () {},
-          // ),
-          // ListTile(
-          //   leading: const Icon(Icons.description),
-          //   title: const Text('Policies'),
-          //   onTap: () {},
-          // ),
-          // const Divider(),
-          ListTile(
-            title: const Text('Tizimdan chiqish'),
-            leading: const Icon(Icons.exit_to_app),
-            onTap: () async {
-              try {
-                showSignOutConfirmationDialog(context);
-              } catch (e) {
-                showAlertDialog(context, 'Error', e);
-              }
-            },
-          ),
+          if (currUser == null)
+            ListTile(
+              leading: const Icon(Icons.login),
+              title: const Text('Tizimga kirish'),
+              onTap: () {
+                Navigator.pushNamed(context, './login/')
+                    .then((value) => Navigator.of(context).pop());
+              },
+            ),
+          if (currUser != null)
+            ListTile(
+              title: const Text('Tizimdan chiqish'),
+              leading: const Icon(Icons.exit_to_app),
+              onTap: () async {
+                try {
+                  showSignOutConfirmationDialog(context);
+                } catch (e) {
+                  showAlertDialog(context, 'Error');
+                }
+              },
+            ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.add_location_alt_outlined),

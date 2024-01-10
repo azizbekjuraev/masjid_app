@@ -111,10 +111,7 @@ class EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
                           ))
                       .then((value) => Navigator.pop(context));
                 },
-                child: Text(
-                  'Tayyor',
-                  style: AppStyles.textStyleGreen,
-                ),
+                child: const Text('Tayyor'),
               ),
             ],
           ),

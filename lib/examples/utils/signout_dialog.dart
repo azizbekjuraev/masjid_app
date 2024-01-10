@@ -1,5 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
+import 'package:masjid_app/examples/widgets/drawer_widget.dart';
+import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
 void showSignOutConfirmationDialog(BuildContext context) {
@@ -34,24 +37,22 @@ void showSignOutConfirmationDialog(BuildContext context) {
                 Navigator.of(context).pop();
                 await FirebaseAuth.instance
                     .signOut()
-                    .then((value) => toastification.show(
-                          context: context,
-                          type: ToastificationType.success,
-                          style: ToastificationStyle.flat,
-                          title: 'Tizimdan muoffaqiyatli chiqildi!',
-                          alignment: Alignment.bottomLeft,
-                          autoCloseDuration: const Duration(seconds: 3),
-                          borderRadius: BorderRadius.circular(12.0),
-                          boxShadow: lowModeShadow,
-                        ))
+                    .then((value) => showAlertDialog(
+                        context,
+                        title: "Xayr. Salomat bo'ling!",
+                        "Siz tizimdan muvaffaqiyatli chiqdingiz...",
+                        toastType: ToastificationType.success,
+                        toastAlignment: Alignment.bottomCenter,
+                        margin: const EdgeInsets.only(bottom: 35.0)))
                     .then((value) => Navigator.of(context).pop());
 
-                // Future.delayed(const Duration(seconds: 1), () {
-                //   Navigator.pushNamed(context, './main/');
-                // });
+                // Update the current user in the provider
+                if (!context.mounted) return;
+                Provider.of<CurrentUserProvider>(context, listen: false)
+                    .setCurrentUser(null);
               } catch (e) {
                 // Handle the error
-                print('Error signing out: $e');
+                debugPrint('Error signing out: $e');
               }
             },
           ),

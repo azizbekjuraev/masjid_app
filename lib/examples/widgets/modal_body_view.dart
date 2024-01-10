@@ -6,7 +6,6 @@ import 'package:masjid_app/examples/data/user_data.dart';
 import 'package:masjid_app/examples/map_point.dart';
 import 'package:masjid_app/examples/map_screen.dart';
 import 'package:masjid_app/examples/styles/app_styles.dart';
-import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
 import 'package:masjid_app/examples/widgets/edit_prayer_times_screen.dart';
 import 'package:masjid_app/examples/utils/analog_clock_builder.dart';
 import 'package:masjid_app/examples/widgets/prayer_time_table.dart';
@@ -95,10 +94,6 @@ class _ModalBodyViewState extends State<ModalBodyView> {
                             visible: currUser?.email == userEmail &&
                                 currUser?.email != null,
                             child: OutlinedButton.icon(
-                              style: OutlinedButton.styleFrom(
-                                  side: BorderSide(
-                                      color:
-                                          AppStyles.backgroundColorGreen700)),
                               onPressed: () async {
                                 await Navigator.push(
                                   context,
@@ -119,10 +114,8 @@ class _ModalBodyViewState extends State<ModalBodyView> {
                                 size: 15,
                                 color: AppStyles.backgroundColorGreen700,
                               ),
-                              label: Text(
+                              label: const Text(
                                 'Yangilash',
-                                style: TextStyle(
-                                    color: AppStyles.backgroundColorGreen700),
                               ),
                             ),
                           ),
@@ -189,7 +182,7 @@ class _ModalBodyViewState extends State<ModalBodyView> {
         },
       );
     } catch (e) {
-      showAlertDialog(context, 'Xatolik', '$e');
+      debugPrint('$e');
     }
   }
 }

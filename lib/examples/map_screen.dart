@@ -2,7 +2,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:masjid_app/examples/styles/app_styles.dart';
 import 'package:masjid_app/examples/utils/get_prayer_times.dart';
-import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
 // ignore: unused_import
 import 'package:masjid_app/examples/utils/upload_masjids_to_firestore.dart';
 // ignore: unused_import
@@ -95,7 +94,7 @@ class _MapScreenState extends State<MapScreen> {
       });
     } catch (e) {
       if (!context.mounted) return;
-      showAlertDialog(context, 'Error fetching data', '$e');
+      debugPrint("$e");
     }
   }
 
@@ -259,14 +258,14 @@ class _MapScreenState extends State<MapScreen> {
                       .copyWith(fillColor: Colors.blue.withOpacity(0.5)));
             },
           ),
-          FloatingActionButton(
-            tooltip: 'Find Closest Masjid',
-            onPressed: () {
-              _moveToClosestMasjid();
-            },
-            // Customize as needed
-            child: const Icon(Icons.location_searching),
-          ),
+          // FloatingActionButton(
+          //   tooltip: 'Find Closest Masjid',
+          //   onPressed: () {
+          //     _moveToClosestMasjid();
+          //   },
+          //   // Customize as needed
+          //   child: const Icon(Icons.location_searching),
+          // ),
           Positioned(
             bottom: 450.0,
             right: 5,

@@ -171,11 +171,9 @@ class _HomeViewState extends State<HomeView> {
       future: fetchPrayerTimesData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(
+          return const Scaffold(
             body: Center(
-              child: CircularProgressIndicator(
-                color: AppStyles.backgroundColorGreen700,
-              ),
+              child: CircularProgressIndicator(),
             ),
           );
         } else if (snapshot.hasError || snapshot.data == null) {
