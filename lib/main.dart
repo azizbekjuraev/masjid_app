@@ -17,6 +17,7 @@ import 'package:masjid_app/examples/clusterized_placemark_collection_page.dart';
 import 'package:masjid_app/examples/views/home_view.dart';
 import 'package:masjid_app/examples/views/settings_view.dart';
 import 'package:provider/provider.dart';
+import 'package:masjid_app/examples/widgets/close_masjid_prayer_times.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +37,7 @@ void main() async {
           './map-screen/': (context) => const MapScreen(),
           './search-masjids/': (context) => const SearchMasjids(),
           './home-view/': (context) => const HomeView(),
+          './close-masjid/': (context) => const CloseMasjidPrayerTimes(),
         }),
   ));
 }
@@ -51,7 +53,8 @@ class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
 
   static const List<Widget> _widgetOptions = <Widget>[
-    HomeView(),
+    // HomeView(),
+    CloseMasjidPrayerTimes(),
     MapScreen(),
     SettingsView(),
   ];

@@ -26,7 +26,6 @@ class DrawerWidgets {
 
     final currentUserProvider = Provider.of<CurrentUserProvider>(context);
     final currUser = currentUserProvider.currentUser;
-    print(currUser);
 
     return Drawer(
       child: ListView(
@@ -93,11 +92,12 @@ class DrawerWidgets {
               },
             ),
           const Divider(),
-          ListTile(
-            leading: const Icon(Icons.add_location_alt_outlined),
-            title: const Text("Masjid qo'shish"),
-            onTap: () {},
-          ),
+          if (currUser != null)
+            ListTile(
+              leading: const Icon(Icons.add_location_alt_outlined),
+              title: const Text("Masjid qo'shish"),
+              onTap: () {},
+            ),
         ],
       ),
     );

@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:masjid_app/examples/styles/app_styles.dart';
 import 'package:masjid_app/examples/utils/get_prayer_times.dart';
+import 'package:masjid_app/examples/utils/getter_functions.dart';
 // ignore: unused_import
 import 'package:masjid_app/examples/utils/upload_masjids_to_firestore.dart';
 // ignore: unused_import
@@ -84,8 +85,8 @@ class _MapScreenState extends State<MapScreen> {
     try {
       var data = await collection.get();
       var prayerData = await prayerCollection.get();
-      List<MapPoint> mapPoints = _getMapPoints(data.docs);
-      List<Map<String, dynamic>> prayerTimes = _getPrayerTimes(prayerData.docs);
+      List<MapPoint> mapPoints = getMapPoints(data.docs);
+      List<Map<String, dynamic>> prayerTimes = getPrayerTimes(prayerData.docs);
       setState(() {
         items = mapPoints;
         originalItems = mapPoints;
@@ -100,35 +101,6 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> onLocationLayerInit() async {
     await _initLocationLayer();
-  }
-
-  List<Map<String, dynamic>> _getPrayerTimes(
-      List<QueryDocumentSnapshot> documents) {
-    return documents.map((DocumentSnapshot document) {
-      return document.data() as Map<String, dynamic>;
-    }).toList();
-  }
-
-  List<MapPoint> _getMapPoints(List<QueryDocumentSnapshot> documents) {
-    return documents.map((DocumentSnapshot document) {
-      final data = document.data() as Map<String, dynamic>;
-      final docId = document.id;
-      final name = data['name'] ?? '';
-      final coords = data['coords'];
-
-      if (coords is GeoPoint) {
-        double latitude = coords.latitude;
-        double longitude = coords.longitude;
-        return MapPoint(
-            documentId: docId,
-            name: name,
-            latitude: latitude,
-            longitude: longitude);
-      } else {
-        return MapPoint(
-            documentId: docId, name: name, latitude: 0.0, longitude: 0.0);
-      }
-    }).toList();
   }
 
   List<PlacemarkMapObject> _getPlacemarkObjects(BuildContext context) {
@@ -179,13 +151,13 @@ class _MapScreenState extends State<MapScreen> {
     return getPrayerTimesForLocation(prayerItems, point.documentId);
   }
 
-  String formatTimestamp(Timestamp? timestamp) {
-    return formatTimestamp(timestamp);
-  }
+  // String formatTimestamp(Timestamp? timestamp) {
+  //   return formatTimestamp(timestamp);
+  // }
 
-  String formatFullTimestamp(Timestamp? timestamp) {
-    return formatFullTimestamp(timestamp);
-  }
+  // String formatFullTimestamp(Timestamp? timestamp) {
+  //   return formatFullTimestamp(timestamp);
+  // }
 
   @override
   Widget build(BuildContext context) {

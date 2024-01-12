@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:masjid_app/examples/constants/constants.dart';
 import 'package:masjid_app/examples/utils/analog_clock_builder.dart';
+import 'package:masjid_app/examples/widgets/close_masjid_prayer_times.dart';
 import 'package:masjid_app/examples/widgets/drawer_widget.dart';
 import 'package:masjid_app/examples/styles/app_styles.dart';
 import 'package:masjid_app/models/prayer_times_model.dart';
@@ -58,107 +59,110 @@ class _HomeViewState extends State<HomeView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Asosiy'),
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(10.0),
-          child: SizedBox(),
-        ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16.0),
-                  color: AppStyles.backgroundColorGreen900),
-              margin: const EdgeInsets.all(12.0),
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(
-                    height: 120,
-                    width: 300,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            CitiesPrayerTimes(
-                                prayerName: "Tong",
-                                prayerTimesData?.times?.tongSaharlik! ?? ''),
-                            CitiesPrayerTimes(
-                                prayerName: 'Quyosh',
-                                prayerTimesData?.times?.quyosh! ?? ''),
-                            CitiesPrayerTimes(
-                                prayerName: 'Peshin',
-                                prayerTimesData?.times?.peshin! ?? ''),
-                            CitiesPrayerTimes(
-                                prayerName: 'Asr',
-                                prayerTimesData?.times?.asr! ?? ''),
-                            CitiesPrayerTimes(
-                                prayerName: 'Shom',
-                                prayerTimesData?.times?.shomIftor! ?? ''),
-                            CitiesPrayerTimes(
-                                prayerName: 'Xufton',
-                                prayerTimesData?.times?.hufton! ?? ''),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          dropdownColor: Colors.black,
-                          value: selectedCity,
-                          items: Constants.cities.map((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(
-                                value,
-                                style: AppStyles.textStyleYellow,
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            if (newValue != null) {
-                              setState(() {
-                                selectedCity = newValue;
-                              });
-                              fetchPrayerTimesData();
-                            }
-                          },
-                          isExpanded: false,
-                          hint: const Text('Select City'),
-                          icon: const Icon(
-                            Icons.keyboard_arrow_down,
-                            color: AppStyles.foregroundColorYellow,
-                          ),
-                        ),
-                      ),
-                      Column(
-                        children: [
-                          Text(
-                            prayerTimesData?.weekday ?? '',
-                            style: AppStyles.textStyleYellow,
-                          ),
-                          Text(
-                            prayerTimesData?.date ?? '',
-                            style: AppStyles.textStyleYellow,
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                  const SizedBox(height: 10.0),
-                ],
-              ),
-            ),
-          ],
+      body: const SingleChildScrollView(
+        child: Center(
+          child: CloseMasjidPrayerTimes(),
+          // Column(
+          // mainAxisAlignment: MainAxisAlignment.center,
+          // crossAxisAlignment: CrossAxisAlignment.stretch,
+          // children: [
+          // Container(
+          //   decoration: BoxDecoration(
+          //       borderRadius: BorderRadius.circular(16.0),
+          //       color: AppStyles.backgroundColorGreen900),
+          //   margin: const EdgeInsets.all(12.0),
+          //   padding: const EdgeInsets.all(16.0),
+          //   child: Column(
+          //     crossAxisAlignment: CrossAxisAlignment.stretch,
+          //     children: [
+          //       SizedBox(
+          //         height: 120,
+          //         width: 300,
+          //         child: ListView(
+          //           scrollDirection: Axis.horizontal,
+          //           children: [
+          //             Row(
+          //               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          //               children: [
+          //                 CitiesPrayerTimes(
+          //                     prayerName: "Tong",
+          //                     prayerTimesData?.times?.tongSaharlik! ?? ''),
+          //                 CitiesPrayerTimes(
+          //                     prayerName: 'Quyosh',
+          //                     prayerTimesData?.times?.quyosh! ?? ''),
+          //                 CitiesPrayerTimes(
+          //                     prayerName: 'Peshin',
+          //                     prayerTimesData?.times?.peshin! ?? ''),
+          //                 CitiesPrayerTimes(
+          //                     prayerName: 'Asr',
+          //                     prayerTimesData?.times?.asr! ?? ''),
+          //                 CitiesPrayerTimes(
+          //                     prayerName: 'Shom',
+          //                     prayerTimesData?.times?.shomIftor! ?? ''),
+          //                 CitiesPrayerTimes(
+          //                     prayerName: 'Xufton',
+          //                     prayerTimesData?.times?.hufton! ?? ''),
+          //               ],
+          //             ),
+          //           ],
+          //         ),
+          //       ),
+          //       Row(
+          //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //         children: [
+          //           DropdownButtonHideUnderline(
+          //             child: DropdownButton<String>(
+          //               dropdownColor: Colors.black,
+          //               value: selectedCity,
+          //               items: Constants.cities.map((String value) {
+          //                 return DropdownMenuItem<String>(
+          //                   value: value,
+          //                   child: Text(
+          //                     value,
+          //                     style: AppStyles.textStyleYellow,
+          //                   ),
+          //                 );
+          //               }).toList(),
+          //               onChanged: (String? newValue) {
+          //                 if (newValue != null) {
+          //                   setState(() {
+          //                     selectedCity = newValue;
+          //                   });
+          //                   fetchPrayerTimesData();
+          //                 }
+          //               },
+          //               isExpanded: false,
+          //               hint: const Text('Select City'),
+          //               icon: const Icon(
+          //                 Icons.keyboard_arrow_down,
+          //                 color: AppStyles.foregroundColorYellow,
+          //               ),
+          //             ),
+          //           ),
+          //           Column(
+          //             children: [
+          //               Text(
+          //                 prayerTimesData?.weekday ?? '',
+          //                 style: AppStyles.textStyleYellow,
+          //               ),
+          //               Text(
+          //                 prayerTimesData?.date ?? '',
+          //                 style: AppStyles.textStyleYellow,
+          //               ),
+          //             ],
+          //           )
+          //         ],
+          //       ),
+          //       const SizedBox(height: 10.0),
+          //     ],
+          //   ),
+          // ),
+          // const SizedBox(
+          //   height: 60,
+          // ),
+          // ],
+          // ),
         ),
       ),
       drawer: drawerWidgets.buildDrawer(context),
@@ -195,7 +199,7 @@ class _HomeViewState extends State<HomeView> {
                   TextButton(
                     onPressed: () => _refreshData(),
                     child: const Icon(Icons.refresh_outlined),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -211,10 +215,11 @@ class _HomeViewState extends State<HomeView> {
 }
 
 class CitiesPrayerTimes extends StatelessWidget {
-  final String itemName;
+  final String prayerTime;
   final String prayerName;
 
-  const CitiesPrayerTimes(this.itemName, {super.key, required this.prayerName});
+  const CitiesPrayerTimes(this.prayerTime,
+      {super.key, required this.prayerName});
 
   @override
   Widget build(BuildContext context) {
@@ -226,8 +231,8 @@ class CitiesPrayerTimes extends StatelessWidget {
             prayerName,
             style: AppStyles.textStyleYellow,
           ),
-          if (itemName.isNotEmpty)
-            buildAnalogClock(itemName, AppStyles.foregroundColorYellow),
+          if (prayerTime.isNotEmpty)
+            buildAnalogClock(prayerTime, AppStyles.foregroundColorYellow),
         ],
       ),
     );

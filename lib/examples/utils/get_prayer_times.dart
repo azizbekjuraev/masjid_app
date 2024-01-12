@@ -10,8 +10,6 @@ List<Map<String, String>> getPrayerTimesForLocation(
     return prayerTimeMasjidId == documentId;
   }).toList();
 
-  print(prayerTimes);
-
   var formattedPrayerTimes = prayerTimes
       .map((prayerTime) => {
             'bomdod': formatTimestamp(prayerTime['bomdod']),

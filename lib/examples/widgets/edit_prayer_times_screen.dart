@@ -3,19 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:masjid_app/examples/map_point.dart';
 import 'package:masjid_app/examples/map_screen.dart';
-import 'package:masjid_app/examples/styles/app_styles.dart';
 import 'package:toastification/toastification.dart';
 
 class EditPrayerTimesScreen extends StatefulWidget {
   final MapPoint point;
   final List<Map<String, String>> prayerTimes;
-  final LocationLayerInitCallback onLocationLayerInit;
+  final LocationLayerInitCallback? onLocationLayerInit;
 
   const EditPrayerTimesScreen(
       {super.key,
       required this.point,
       required this.prayerTimes,
-      required this.onLocationLayerInit});
+      this.onLocationLayerInit});
 
   @override
   EditPrayerTimesScreenState createState() => EditPrayerTimesScreenState();
@@ -177,6 +176,6 @@ class EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
         'created_at': Timestamp.fromDate(DateTime.now()),
       });
     }
-    widget.onLocationLayerInit();
+    widget.onLocationLayerInit!();
   }
 }

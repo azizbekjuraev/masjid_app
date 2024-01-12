@@ -1,11 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:map_launcher/map_launcher.dart';
 import 'package:masjid_app/examples/data/user_data.dart';
 import 'package:masjid_app/examples/map_point.dart';
 import 'package:masjid_app/examples/map_screen.dart';
 import 'package:masjid_app/examples/styles/app_styles.dart';
+import 'package:masjid_app/examples/utils/open_maps_sheet.dart';
 import 'package:masjid_app/examples/widgets/edit_prayer_times_screen.dart';
 import 'package:masjid_app/examples/utils/analog_clock_builder.dart';
 import 'package:masjid_app/examples/widgets/prayer_time_table.dart';
@@ -54,7 +53,8 @@ class _ModalBodyViewState extends State<ModalBodyView> {
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       child: FloatingActionButton.small(
                         onPressed: () async {
-                          await _openMapsSheet(context);
+                          await openMapsSheet(context, widget.point.latitude,
+                              widget.point.longitude, widget.point.name);
                         },
                         backgroundColor: AppStyles.backgroundColorGreen700,
                         foregroundColor: AppStyles.foregroundColorYellow,
@@ -64,11 +64,11 @@ class _ModalBodyViewState extends State<ModalBodyView> {
                   ],
                 ),
               ),
-              const SizedBox(height: 5),
               for (var time in widget.prayerTimes)
                 Column(
                   children: [
                     PrayerTimeTable(
+                      clockColor: Colors.black,
                       prayerTimes: widget.prayerTimes,
                       textStyle: myTextStyle,
                       title: 'Azon Vaqtlari',
@@ -77,6 +77,7 @@ class _ModalBodyViewState extends State<ModalBodyView> {
                       buildCells: buildAzonPrayerTimeCells,
                     ),
                     PrayerTimeTable(
+                      clockColor: Colors.black,
                       prayerTimes: widget.prayerTimes,
                       textStyle: myTextStyle,
                       title: 'Takbir Vaqtlari',
@@ -145,44 +146,4 @@ class _ModalBodyViewState extends State<ModalBodyView> {
   }
 
   TextStyle myTextStyle = const TextStyle(fontSize: 15);
-
-  Future<void> _openMapsSheet(context) async {
-    try {
-      final coords = Coords(widget.point.latitude, widget.point.longitude);
-      final title = widget.point.name;
-      final availableMaps = await MapLauncher.installedMaps;
-
-      showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return SafeArea(
-            child: SingleChildScrollView(
-              child: SizedBox(
-                height: 150,
-                child: Wrap(
-                  children: <Widget>[
-                    for (var map in availableMaps)
-                      ListTile(
-                        onTap: () => map.showMarker(
-                          coords: coords,
-                          title: title,
-                        ),
-                        title: Text(map.mapName),
-                        leading: SvgPicture.asset(
-                          map.icon,
-                          height: 30,
-                          width: 30,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      );
-    } catch (e) {
-      debugPrint('$e');
-    }
-  }
 }
