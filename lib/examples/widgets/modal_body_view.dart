@@ -5,9 +5,11 @@ import 'package:masjid_app/examples/map_point.dart';
 import 'package:masjid_app/examples/map_screen.dart';
 import 'package:masjid_app/examples/styles/app_styles.dart';
 import 'package:masjid_app/examples/utils/open_maps_sheet.dart';
+import 'package:masjid_app/examples/widgets/drawer_widget.dart';
 import 'package:masjid_app/examples/widgets/edit_prayer_times_screen.dart';
 import 'package:masjid_app/examples/utils/analog_clock_builder.dart';
 import 'package:masjid_app/examples/widgets/prayer_time_table.dart';
+import 'package:provider/provider.dart';
 
 class ModalBodyView extends StatefulWidget {
   const ModalBodyView(
@@ -27,8 +29,10 @@ class _ModalBodyViewState extends State<ModalBodyView> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double dynamicFontSize = screenWidth * 0.04;
-    final currUser = FirebaseAuth.instance.currentUser;
-    final userEmail = UserData.getUserEmail();
+    // final currUser = FirebaseAuth.instance.currentUser;
+    // final userEmail = UserData.getUserEmail();
+    final currentUserProvider = Provider.of<CurrentUserProvider>(context);
+    final currUser = currentUserProvider.currentUser;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: InteractiveViewer(
@@ -92,8 +96,7 @@ class _ModalBodyViewState extends State<ModalBodyView> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Visibility(
-                            visible: currUser?.email == userEmail &&
-                                currUser?.email != null,
+                            visible: currUser != null,
                             child: OutlinedButton.icon(
                               onPressed: () async {
                                 await Navigator.push(

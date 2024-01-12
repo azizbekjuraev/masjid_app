@@ -26,6 +26,7 @@ class DrawerWidgets {
 
     final currentUserProvider = Provider.of<CurrentUserProvider>(context);
     final currUser = currentUserProvider.currentUser;
+    print(currUser);
 
     return Drawer(
       child: ListView(
