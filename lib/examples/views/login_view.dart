@@ -52,15 +52,11 @@ class _LoginViewState extends State<LoginView> {
         return;
       }
       // Move the actual sign-in code inside the try block
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-
-      // Update the current user in the provider
-      Provider.of<CurrentUserProvider>(context, listen: false)
-          .setCurrentUser(userCredential.user);
+      UserData.setEmail(email);
 
       // on success
       if (!context.mounted) return;

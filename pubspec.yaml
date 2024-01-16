@@ -51,6 +51,8 @@ dependencies:
   http: ^1.1.2
   geolocator: ^10.1.0
   location: ^5.0.3
+  connectivity_plus: ^5.0.2
+  app_settings: ^5.1.1
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -67,13 +69,7 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
-    - assets/user.png
-    - assets/arrow.png
-    - assets/route_start.png
-    - assets/icons/place.png
-    - assets/mosque.png
-    - assets/islamic.png
-    - assets/Masjids.csv
+    - assets/
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

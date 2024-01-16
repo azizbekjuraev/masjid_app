@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:masjid_app/examples/data/user_data.dart';
 import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
-import 'package:masjid_app/examples/widgets/drawer_widget.dart';
-import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
 void showSignOutConfirmationDialog(BuildContext context) {
@@ -46,10 +45,7 @@ void showSignOutConfirmationDialog(BuildContext context) {
                         margin: const EdgeInsets.only(bottom: 35.0)))
                     .then((value) => Navigator.of(context).pop());
 
-                // Update the current user in the provider
-                if (!context.mounted) return;
-                Provider.of<CurrentUserProvider>(context, listen: false)
-                    .setCurrentUser(null);
+                UserData.clearThePreferences();
               } catch (e) {
                 // Handle the error
                 debugPrint('Error signing out: $e');

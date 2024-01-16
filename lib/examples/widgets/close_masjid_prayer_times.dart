@@ -12,8 +12,9 @@ import 'package:masjid_app/examples/utils/getter_functions.dart';
 import 'package:masjid_app/examples/utils/open_maps_sheet.dart';
 import 'package:masjid_app/examples/widgets/drawer_widget.dart';
 import 'package:masjid_app/examples/widgets/prayer_time_table.dart';
-
+import 'package:app_settings/app_settings.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class CloseMasjidPrayerTimes extends StatefulWidget {
   const CloseMasjidPrayerTimes({super.key});
@@ -43,6 +44,18 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
   }
 
   Future<void> fetchData() async {
+    PermissionStatus status = await Permission.locationWhenInUse.status;
+    if (status.isDenied) {
+      // Request permission
+      status = await Permission.locationWhenInUse.request();
+      if (status.isDenied) {
+        // Handle denied permission
+        openAppSettings();
+      } else {
+        // Permission granted, fetch data again and reset the navigation
+        _dataFetching = fetchData();
+      }
+    }
     try {
       var data = await collection.get();
       var prayerData = await prayerCollection.get();
@@ -149,7 +162,6 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
   }
 
   Widget buildUI() {
-    DrawerWidgets drawerWidgets = DrawerWidgets();
     TextStyle myTextStyle =
         const TextStyle(color: AppStyles.foregroundColorYellow);
     double screenWidth = MediaQuery.of(context).size.width;
@@ -227,7 +239,7 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
           ),
         ),
       ),
-      drawer: drawerWidgets.buildDrawer(context),
+      drawer: DrawerWidgets(),
     );
   }
 }

@@ -1,56 +1,76 @@
-import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:masjid_app/examples/data/user_data.dart';
 import 'package:flutter/material.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:masjid_app/examples/data/user_data.dart';
 import 'package:masjid_app/examples/styles/app_styles.dart';
 import 'package:masjid_app/examples/utils/signout_dialog.dart';
 import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
-import 'package:provider/provider.dart';
 
-class CurrentUserProvider extends ChangeNotifier {
-  User? _currentUser;
-
-  User? get currentUser => _currentUser;
-
-  void setCurrentUser(User? user) {
-    _currentUser = user;
-    notifyListeners();
-  }
+class DrawerWidgets extends StatefulWidget {
+  @override
+  _DrawerWidgetsState createState() => _DrawerWidgetsState();
 }
 
-class DrawerWidgets {
-  Widget buildDrawer(BuildContext context) {
-    // final displayName = UserData.getDisplayName();
-    // final userEmail = UserData.getUserEmail();
-    // final currUser = FirebaseAuth.instance.currentUser;
-    // print(currUser);
+class _DrawerWidgetsState extends State<DrawerWidgets> {
+  late Future<bool> internetConnection;
+  late String currUser;
 
-    final currentUserProvider = Provider.of<CurrentUserProvider>(context);
-    final currUser = currentUserProvider.currentUser;
-    print(currUser);
+  @override
+  void initState() {
+    super.initState();
+    currUser = UserData.getUserEmail() ?? "";
+    internetConnection = isInternetConnected();
+  }
 
+  Future<bool> isInternetConnected() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    return connectivityResult != ConnectivityResult.none;
+  }
+
+  void updateCurrUser() {
+    setState(() {
+      currUser = UserData.getUserEmail() ?? "";
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           UserAccountsDrawerHeader(
             accountName: Container(
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  color: AppStyles.backgroundColorGreen900,
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: const Text(
-                  'Hush kelibsiz!',
-                  style: AppStyles.textStyleYellow,
-                )),
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: AppStyles.backgroundColorGreen700,
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: const Text(
+                'Hush kelibsiz!',
+                style: AppStyles.textStyleYellow,
+              ),
+            ),
             accountEmail: null,
             currentAccountPicture: CircleAvatar(
               child: ClipOval(
-                child: Image.network(
-                  'https://cdn-icons-png.flaticon.com/512/4264/4264711.png',
-                  fit: BoxFit.cover,
-                  width: 90,
-                  height: 90,
+                child: FutureBuilder<bool>(
+                  future: internetConnection,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return const Icon(Icons.error);
+                    } else {
+                      return snapshot.data == true
+                          ? Image.network(
+                              'https://cdn-icons-png.flaticon.com/512/4264/4264711.png',
+                              fit: BoxFit.cover,
+                              width: 90,
+                              height: 90,
+                            )
+                          : Container();
+                    }
+                  },
                 ),
               ),
             ),
@@ -63,7 +83,7 @@ class DrawerWidgets {
               ),
             ],
             decoration: BoxDecoration(
-              color: AppStyles.backgroundColorGreen700,
+              color: AppStyles.backgroundColorGreen900,
               image: const DecorationImage(
                 fit: BoxFit.fill,
                 image: NetworkImage(
@@ -71,16 +91,22 @@ class DrawerWidgets {
               ),
             ),
           ),
-          if (currUser == null)
+          if (currUser.isEmpty)
             ListTile(
               leading: const Icon(Icons.login),
               title: const Text('Tizimga kirish'),
               onTap: () {
-                Navigator.pushNamed(context, './login/')
-                    .then((value) => Navigator.of(context).pop());
+                internetConnection.then((value) {
+                  if (value) {
+                    Navigator.pushNamed(context, './login/')
+                        .then((value) => Navigator.of(context).pop());
+                  } else {
+                    // Handle no internet connection
+                  }
+                });
               },
             ),
-          if (currUser != null)
+          if (currUser.isNotEmpty)
             ListTile(
               title: const Text('Tizimdan chiqish'),
               leading: const Icon(Icons.exit_to_app),
@@ -93,7 +119,7 @@ class DrawerWidgets {
               },
             ),
           const Divider(),
-          if (currUser != null)
+          if (currUser.isNotEmpty)
             ListTile(
               leading: const Icon(Icons.add_location_alt_outlined),
               title: const Text("Masjid qo'shish"),

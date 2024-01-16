@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 import 'package:masjid_app/examples/widgets/map_page.dart';
@@ -21,6 +22,7 @@ class _UserLayerExampleState extends State<_UserLayerExample> {
   late YandexMapController controller;
   GlobalKey mapKey = GlobalKey();
   TextEditingController queryController = TextEditingController();
+  var initialPosition;
 
   Future<bool> get locationPermissionNotGranted async =>
       !(await Permission.location.request().isGranted);
@@ -29,11 +31,23 @@ class _UserLayerExampleState extends State<_UserLayerExample> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: text));
   }
 
+  Future<void> getCurrentLocation() async {
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    initialPosition =
+        Point(latitude: position.latitude, longitude: position.longitude);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getCurrentLocation();
+  }
+
   @override
   Widget build(BuildContext context) {
     // Set initial camera position to a specific region
-    const initialPosition =
-        Point(latitude: 41.311081, longitude: 69.240562); // Example coordinates
+    // Example coordinates
 
     final animation =
         const MapAnimation(type: MapAnimationType.smooth, duration: 2.0);
@@ -51,7 +65,7 @@ class _UserLayerExampleState extends State<_UserLayerExample> {
                 CameraUpdate.newCameraPosition(
                   CameraPosition(
                     target: initialPosition,
-                    zoom: 6, // You can set the initial zoom level
+                    zoom: 13, // You can set the initial zoom level
                   ),
                 ),
                 animation: const MapAnimation(),

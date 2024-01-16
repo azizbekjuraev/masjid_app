@@ -165,7 +165,7 @@ class _HomeViewState extends State<HomeView> {
           // ),
         ),
       ),
-      drawer: drawerWidgets.buildDrawer(context),
+      // drawer: drawerWidgets.buildDrawer(context),
     );
   }
 

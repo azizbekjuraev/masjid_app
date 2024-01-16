@@ -18,4 +18,10 @@ class UserData {
       await _preferences.setString(_displayName, displayName);
 
   static String? getDisplayName() => _preferences.getString(_displayName);
+
+  // Method to clear user data on logout
+  static Future clearThePreferences() async {
+    await _preferences.remove(_keyEmail);
+    await _preferences.remove(_displayName);
+  }
 }
