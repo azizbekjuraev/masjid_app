@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:masjid_app/examples/data/user_data.dart';
@@ -10,9 +9,8 @@ import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
 import 'package:masjid_app/examples/utils/upload_masjids_to_firestore.dart';
 // ignore: unused_import
 import 'package:masjid_app/examples/utils/upload_prayer_times_to_firestore.dart';
-import 'package:masjid_app/examples/widgets/drawer_widget.dart';
+import 'package:masjid_app/examples/views/add_masjid_view.dart';
 import 'package:masjid_app/examples/widgets/modal_body_view.dart';
-import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 import 'package:masjid_app/examples/map_point.dart';
@@ -46,6 +44,7 @@ class _MapScreenState extends State<MapScreen> {
   bool mapTapped = false;
   int? _currentOpenModalIndex;
   List<MapObject> mapObject = [];
+  Point? newMasjidPoint;
 
   final animation =
       const MapAnimation(type: MapAnimationType.smooth, duration: 2.0);
@@ -173,7 +172,10 @@ class _MapScreenState extends State<MapScreen> {
                     hintStyle: TextStyle(color: Colors.black12)),
                 style: const TextStyle(color: Colors.black),
               )
-            : const FittedBox(child: Text('Masjidlar Takbir Vaqtlari')),
+            : FittedBox(
+                child: mapTapped
+                    ? const Text('Xaritadan Masjid Manzilini Tanlang...')
+                    : const Text('Masjidlar Takbir Vaqtlari')),
         actions: [
           currUser != null && isSearchMode == false
               ? IconButton(
@@ -183,7 +185,7 @@ class _MapScreenState extends State<MapScreen> {
                     });
                   },
                   icon: mapTapped
-                      ? const Icon(Icons.wrong_location)
+                      ? const Icon(Icons.cancel_sharp)
                       : const Icon(Icons.add_location_alt))
               : Container(),
           IconButton(
@@ -203,8 +205,8 @@ class _MapScreenState extends State<MapScreen> {
         children: [
           YandexMap(
             onMapTap: (point) {
-              print(mapTapped);
               mapTapped ? addMark(point: point) : null;
+
               _initLocationLayer();
             },
             onMapCreated: (controller) async {
@@ -212,16 +214,18 @@ class _MapScreenState extends State<MapScreen> {
               // await uploadMasjidsToFirestore();
               // await uploadPrayerTimesToFirestore();
 
-              await _mapController.moveCamera(
-                CameraUpdate.newCameraPosition(
-                  CameraPosition(
-                    target: initialPosition,
-                    zoom: 13, // You can set the initial zoom level
-                  ),
-                ),
-                animation: const MapAnimation(),
-              );
-              await _initLocationLayer();
+              await _mapController
+                  .moveCamera(
+                    CameraUpdate.newCameraPosition(
+                      CameraPosition(
+                        target: initialPosition,
+                        zoom: 13,
+                      ),
+                    ),
+                    animation: const MapAnimation(),
+                  )
+                  .then((value) => _initLocationLayer());
+              // await _initLocationLayer();
             },
             nightModeEnabled: isNightModeAnabled,
             mapObjects: mapTapped ? mapObject : _getPlacemarkObjects(context),
@@ -288,7 +292,7 @@ class _MapScreenState extends State<MapScreen> {
           ),
           mapTapped
               ? Positioned(
-                  bottom: MediaQuery.of(context).size.height / 21,
+                  bottom: 42.5,
                   right: MediaQuery.of(context).size.width / 3,
                   child: SizedBox(
                     width: 140,
@@ -299,7 +303,7 @@ class _MapScreenState extends State<MapScreen> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
                       onPressed: () async {
-                        await _mapController.moveCamera(CameraUpdate.zoomOut());
+                        await onTanlashButtonPressed();
                       },
                       child: const Text('Tanlash'),
                     ),
@@ -397,7 +401,9 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void addMark({required Point point}) {
+    newMasjidPoint = point;
     final myLocationMarker = PlacemarkMapObject(
+      isDraggable: true,
       opacity: 1,
       mapId: const MapObjectId('currentLocation'),
       point: point,
@@ -411,6 +417,20 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
     mapObject.add(myLocationMarker);
-    // setState(() {});
+  }
+
+  Future<void> onTanlashButtonPressed() async {
+    // Check if newMasjidPoint is not null
+    if (newMasjidPoint != null) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AddMasjidView(
+            newMasjidPoint: newMasjidPoint,
+            onLocationLayerInit: onLocationLayerInit,
+          ),
+        ),
+      );
+    }
   }
 }

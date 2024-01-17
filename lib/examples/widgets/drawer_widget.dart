@@ -118,13 +118,13 @@ class _DrawerWidgetsState extends State<DrawerWidgets> {
                 }
               },
             ),
-          const Divider(),
-          if (currUser.isNotEmpty)
-            ListTile(
-              leading: const Icon(Icons.add_location_alt_outlined),
-              title: const Text("Masjid qo'shish"),
-              onTap: () {},
-            ),
+          // const Divider(),
+          // if (currUser.isNotEmpty)
+          //   ListTile(
+          //     leading: const Icon(Icons.add_location_alt_outlined),
+          //     title: const Text("Masjid qo'shish"),
+          //     onTap: () {},
+          //   ),
         ],
       ),
     );

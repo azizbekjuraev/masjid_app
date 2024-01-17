@@ -11,7 +11,7 @@ Future<void> uploadPrayerTimesToFirestore() async {
         .collection('prayer_time')
         .where('masjid', isEqualTo: masjidRef)
         .get();
-
+    print(existingPrayerTimes);
     if (existingPrayerTimes.docs.isNotEmpty) {
       continue;
     }
