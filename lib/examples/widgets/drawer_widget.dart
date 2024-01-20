@@ -6,6 +6,8 @@ import 'package:masjid_app/examples/utils/signout_dialog.dart';
 import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
 
 class DrawerWidgets extends StatefulWidget {
+  const DrawerWidgets({super.key});
+
   @override
   _DrawerWidgetsState createState() => _DrawerWidgetsState();
 }
@@ -118,13 +120,6 @@ class _DrawerWidgetsState extends State<DrawerWidgets> {
                 }
               },
             ),
-          // const Divider(),
-          // if (currUser.isNotEmpty)
-          //   ListTile(
-          //     leading: const Icon(Icons.add_location_alt_outlined),
-          //     title: const Text("Masjid qo'shish"),
-          //     onTap: () {},
-          //   ),
         ],
       ),
     );

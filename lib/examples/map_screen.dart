@@ -53,7 +53,7 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     searchController = TextEditingController();
-    getCurrentLocation();
+    _initLocationLayer();
   }
 
   @override
@@ -84,6 +84,7 @@ class _MapScreenState extends State<MapScreen> {
         prayerItems = prayerTimes;
         isLoaded = true;
       });
+      await getCurrentLocation();
     } catch (e) {
       if (!context.mounted) return;
       debugPrint("$e");
@@ -174,8 +175,8 @@ class _MapScreenState extends State<MapScreen> {
               )
             : FittedBox(
                 child: mapTapped
-                    ? const Text('Xaritadan Masjid Manzilini Tanlang...')
-                    : const Text('Masjidlar Takbir Vaqtlari')),
+                    ? const Text('Xaritadan manzilni tanlang')
+                    : const Text('MasjidGo')),
         actions: [
           currUser != null && isSearchMode == false
               ? IconButton(
@@ -206,7 +207,6 @@ class _MapScreenState extends State<MapScreen> {
           YandexMap(
             onMapTap: (point) {
               mapTapped ? addMark(point: point) : null;
-
               _initLocationLayer();
             },
             onMapCreated: (controller) async {
@@ -224,7 +224,7 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                     animation: const MapAnimation(),
                   )
-                  .then((value) => _initLocationLayer());
+                  .then((value) async => await _initLocationLayer());
               // await _initLocationLayer();
             },
             nightModeEnabled: isNightModeAnabled,

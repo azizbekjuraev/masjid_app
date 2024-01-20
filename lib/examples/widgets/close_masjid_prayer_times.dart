@@ -10,6 +10,7 @@ import 'package:masjid_app/examples/utils/analog_clock_builder.dart';
 import 'package:masjid_app/examples/utils/get_prayer_times.dart';
 import 'package:masjid_app/examples/utils/getter_functions.dart';
 import 'package:masjid_app/examples/utils/open_maps_sheet.dart';
+import 'package:masjid_app/examples/views/news_view.dart';
 import 'package:masjid_app/examples/widgets/drawer_widget.dart';
 import 'package:masjid_app/examples/widgets/prayer_time_table.dart';
 import 'package:app_settings/app_settings.dart';
@@ -34,7 +35,7 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
   var masjidName = '';
   double? lat;
   double? long;
-
+  bool isFetching = false;
   Position? userLocation;
 
   @override
@@ -45,6 +46,25 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
 
   Future<void> fetchData() async {
     PermissionStatus status = await Permission.locationWhenInUse.status;
+    if (status.isGranted) {
+      try {
+        var data = await collection.get();
+        var prayerData = await prayerCollection.get();
+        List<MapPoint> mapPoints = getMapPoints(data.docs);
+        List<Map<String, dynamic>> prayerTimes =
+            getPrayerTimes(prayerData.docs);
+        setState(() {
+          items = mapPoints;
+          prayerItems = prayerTimes;
+        });
+
+        await getCurrentLocation();
+        await moveToClosestMasjid();
+      } catch (e) {
+        if (!context.mounted) return;
+        debugPrint("$e");
+      }
+    }
     if (status.isDenied) {
       // Request permission
       status = await Permission.locationWhenInUse.request();
@@ -56,21 +76,6 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
         _dataFetching = fetchData();
       }
     }
-    try {
-      var data = await collection.get();
-      var prayerData = await prayerCollection.get();
-      List<MapPoint> mapPoints = getMapPoints(data.docs);
-      List<Map<String, dynamic>> prayerTimes = getPrayerTimes(prayerData.docs);
-      setState(() {
-        items = mapPoints;
-        prayerItems = prayerTimes;
-      });
-      await getCurrentLocation();
-      moveToClosestMasjid();
-    } catch (e) {
-      if (!context.mounted) return;
-      debugPrint("$e");
-    }
   }
 
   Future<void> getCurrentLocation() async {
@@ -78,7 +83,6 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
         desiredAccuracy: LocationAccuracy.high);
     setState(() {
       userLocation = position;
-      moveToClosestMasjid();
     });
   }
 
@@ -86,8 +90,7 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
     return getPrayerTimesForLocation(prayerItems, point.documentId);
   }
 
-  void moveToClosestMasjid() async {
-    // await getCurrentLocation();
+  Future<void> moveToClosestMasjid() async {
     // Get the closest masjid to the user's location
     closestMasjid = findClosestMasjid(
       userLocation!.latitude,
@@ -148,13 +151,13 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
     return FutureBuilder<void>(
       future: _dataFetching,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          ); // Show loading indicator
+        if (snapshot.connectionState == ConnectionState.waiting ||
+            snapshot.connectionState == ConnectionState.none) {
+          return buildUI(); // Show loading indicator
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else {
+          isFetching = true;
           return buildUI(); // Build your UI with the fetched data
         }
       },
@@ -168,6 +171,46 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
     double dynamicFontSize = screenWidth * 0.04;
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          Builder(builder: (context) {
+            return Stack(children: [
+              IconButton(
+                  onPressed: () {
+                    //open end drower here
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const NewsView()));
+                  },
+                  icon: Icon(
+                    Icons.notifications,
+                    color: AppStyles.backgroundColorGreen700,
+                  )),
+              Positioned(
+                right: 10,
+                top: 10,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    color: AppStyles.foregroundColorRed,
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 5,
+                    minHeight: 5,
+                  ),
+                  child: const Text(
+                    '5',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+              ),
+            ]);
+          })
+        ],
         title: const Text('Asosiy'),
       ),
       body: InteractiveViewer(
@@ -184,62 +227,73 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
                     color: AppStyles.backgroundColorGreen900),
                 margin: const EdgeInsets.all(12.0),
                 padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    PrayerTimeTable(
-                      prayerTimes: prayerTimes,
-                      textStyle: myTextStyle,
-                      title: 'Azon Vaqtlari',
-                      titleColor: AppStyles.foregroundColorYellow,
-                      borderColor: AppStyles.backgroundColorGreen900,
-                      buildCells: buildAzonPrayerTimeCells,
-                      clockColor: AppStyles.foregroundColorYellow,
-                    ),
-                    PrayerTimeTable(
-                      prayerTimes: prayerTimes,
-                      textStyle: myTextStyle,
-                      title: 'Takbir Vaqtlari',
-                      titleColor: AppStyles.foregroundColorYellow,
-                      borderColor: AppStyles.backgroundColorGreen900,
-                      buildCells: buildTakbirPrayerTimeCells,
-                      clockColor: AppStyles.foregroundColorYellow,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                child: isFetching
+                    ? Column(
                         children: [
-                          Flexible(
-                            child: Text(masjidName,
-                                style: TextStyle(
-                                    fontSize: dynamicFontSize,
-                                    color: AppStyles.foregroundColorYellow)),
+                          PrayerTimeTable(
+                            prayerTimes: prayerTimes,
+                            textStyle: myTextStyle,
+                            title: 'Azon Vaqtlari',
+                            titleColor: AppStyles.foregroundColorYellow,
+                            borderColor: AppStyles.backgroundColorGreen900,
+                            buildCells: buildAzonPrayerTimeCells,
+                            clockColor: AppStyles.foregroundColorYellow,
                           ),
-                          Container(
+                          PrayerTimeTable(
+                            prayerTimes: prayerTimes,
+                            textStyle: myTextStyle,
+                            title: 'Takbir Vaqtlari',
+                            titleColor: AppStyles.foregroundColorYellow,
+                            borderColor: AppStyles.backgroundColorGreen900,
+                            buildCells: buildTakbirPrayerTimeCells,
+                            clockColor: AppStyles.foregroundColorYellow,
+                          ),
+                          Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 10.0),
-                            child: FloatingActionButton.small(
-                              onPressed: () async {
-                                await openMapsSheet(
-                                    context, lat, long, masjidName);
-                              },
-                              backgroundColor:
-                                  AppStyles.backgroundColorGreen700,
-                              foregroundColor: AppStyles.foregroundColorYellow,
-                              child: const Icon(Icons.location_on_outlined),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Flexible(
+                                  child: Text(masjidName,
+                                      style: TextStyle(
+                                          fontSize: dynamicFontSize,
+                                          color:
+                                              AppStyles.foregroundColorYellow)),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10.0),
+                                  child: FloatingActionButton.small(
+                                    elevation: 0,
+                                    onPressed: () async {
+                                      await openMapsSheet(
+                                          context, lat, long, masjidName);
+                                    },
+                                    backgroundColor:
+                                        AppStyles.backgroundColorGreen700,
+                                    foregroundColor:
+                                        AppStyles.foregroundColorYellow,
+                                    child: const Icon(Icons.route),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
+                      )
+                    : const Center(
+                        heightFactor: 10,
+                        child: CircularProgressIndicator(
+                          color: AppStyles.foregroundColorYellow,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
               ),
             ],
           ),
         ),
       ),
-      drawer: DrawerWidgets(),
+      drawer: const DrawerWidgets(),
     );
   }
 }

@@ -81,6 +81,16 @@ class AddMasjidViewState extends State<AddMasjidView> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            isLoading
+                ? Center(
+                    child: LinearProgressIndicator(
+                      backgroundColor: Colors.grey,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppStyles.backgroundColorGreen700,
+                      ),
+                    ),
+                  )
+                : Container(),
             Image.asset(
               'assets/mosque.png',
               width: 200,
@@ -99,55 +109,21 @@ class AddMasjidViewState extends State<AddMasjidView> {
               autocorrect: false,
               autofocus: true,
             ),
-            // const SizedBox(
-            //   height: 25,
-            // ),
-            // Row(
-            //   children: [
-            //     Expanded(
-            //       child: TextField(
-            //         decoration: const InputDecoration(
-            //             border: OutlineInputBorder(), labelText: 'Kenglik'),
-            //         controller: TextEditingController(
-            //           text: widget.newMasjidPoint?.latitude.toString() ?? '',
-            //         ),
-            //         readOnly: true,
-            //       ),
-            //     ),
-            //     const SizedBox(
-            //       width: 10,
-            //     ),
-            //     Expanded(
-            //       child: TextField(
-            //         decoration: const InputDecoration(
-            //             border: OutlineInputBorder(), labelText: 'Uzunlik'),
-            //         controller: TextEditingController(
-            //           text: widget.newMasjidPoint?.longitude.toString() ?? '',
-            //         ),
-            //         readOnly: true,
-            //       ),
-            //     ),
-            //   ],
-            // ),
             const SizedBox(
               height: 25,
             ),
             SizedBox(
               width: 140,
               height: 50,
-              child: isLoading
-                  ? Center(
-                      child: CircularProgressIndicator(
-                        color: AppStyles.backgroundColorGreen700,
-                      ),
-                    )
-                  : FloatingActionButton(
-                      backgroundColor: AppStyles.backgroundColorGreen700,
-                      foregroundColor: AppStyles.foregroundColorYellow,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      onPressed: () async {
+              child: FloatingActionButton(
+                backgroundColor: AppStyles.backgroundColorGreen700,
+                foregroundColor: AppStyles.foregroundColorYellow,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                onPressed: isLoading
+                    ? null
+                    : () async {
                         FocusScope.of(context).unfocus();
                         // Check if the masjid name is empty
                         if (_masjidNameController.text.trim().isEmpty) {
@@ -163,8 +139,8 @@ class AddMasjidViewState extends State<AddMasjidView> {
                           await uploadToFirestore();
                         }
                       },
-                      child: const Text("Qoshish"),
-                    ),
+                child: const Text("Qoshish"),
+              ),
             ),
           ],
         ),

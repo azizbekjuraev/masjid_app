@@ -7,6 +7,8 @@ import 'package:masjid_app/examples/map_controls_page.dart';
 import 'package:masjid_app/examples/search_page.dart';
 import 'package:masjid_app/examples/launch_app.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:masjid_app/examples/views/news_view.dart';
+import 'package:masjid_app/examples/views/onboarding_slider_view.dart';
 import 'package:masjid_app/examples/widgets/drawer_widget.dart';
 import 'package:masjid_app/firebase_options.dart';
 // import 'package:masjid_app/examples/widgets/drawer_widget.dart';
@@ -17,11 +19,16 @@ import 'package:masjid_app/examples/clusterized_placemark_collection_page.dart';
 import 'package:masjid_app/examples/views/home_view.dart';
 import 'package:masjid_app/examples/views/settings_view.dart';
 import 'package:masjid_app/examples/widgets/close_masjid_prayer_times.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await UserData.init();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // SharedPreferences prefs = await SharedPreferences.getInstance();
+  // bool onboardingShown = prefs.getBool('onboardingShown') ?? false;
+
   runApp(MaterialApp(
       home: const MainPage(),
       theme: ThemeData(
@@ -35,6 +42,7 @@ void main() async {
         './search-masjids/': (context) => const SearchMasjids(),
         './home-view/': (context) => const HomeView(),
         './close-masjid/': (context) => const CloseMasjidPrayerTimes(),
+        './news-view/': (context) => const NewsView(),
       }));
 }
 
@@ -72,7 +80,7 @@ class _MainPageState extends State<MainPage> {
             label: 'Asosiy',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.location_on_outlined),
+            icon: Icon(Icons.location_on),
             label: 'Masjidlar',
           ),
           BottomNavigationBarItem(

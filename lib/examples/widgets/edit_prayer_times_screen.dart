@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:masjid_app/examples/map_point.dart';
 import 'package:masjid_app/examples/map_screen.dart';
+import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
 import 'package:toastification/toastification.dart';
 
 class EditPrayerTimesScreen extends StatefulWidget {
@@ -98,16 +99,14 @@ class EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
                   // Perform async operation (e.g., updating data in Firestore)
                   await _updatePrayerTimesInFirestore()
                       .then((value) => Navigator.pop(context))
-                      .then((value) => toastification.show(
-                            context: context,
-                            type: ToastificationType.success,
-                            style: ToastificationStyle.flat,
-                            title: 'Vaqtlar muoffaqiyatli yangilandi!',
-                            alignment: Alignment.bottomLeft,
-                            autoCloseDuration: const Duration(seconds: 3),
-                            borderRadius: BorderRadius.circular(12.0),
-                            boxShadow: lowModeShadow,
-                          ))
+                      .then((value) => showAlertDialog(
+                          context,
+                          title: "Tabriklaymiz!",
+                          "Siz masjid vaqtini muvaffaqiyatli o'zgartirdingiz...",
+                          toastType: ToastificationType.success,
+                          toastAlignment: Alignment.topCenter,
+                          margin: const EdgeInsets.only(top: 28.0)))
+                      .then((value) => Navigator.pop(context))
                       .then((value) => Navigator.pop(context));
                 },
                 child: const Text('Tayyor'),

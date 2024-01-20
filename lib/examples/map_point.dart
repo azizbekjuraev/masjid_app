@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 /// Модель точки на карте
 class MapPoint extends Equatable {
-  const MapPoint({
+  MapPoint({
     required this.documentId,
     required this.name,
     required this.latitude,
@@ -12,7 +12,7 @@ class MapPoint extends Equatable {
   /// Название населенного пункта
   final String documentId;
 
-  final String name;
+  String name;
 
   /// Широта
   final double latitude;

@@ -1,12 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:masjid_app/examples/data/user_data.dart';
 import 'package:masjid_app/examples/map_point.dart';
 import 'package:masjid_app/examples/map_screen.dart';
 import 'package:masjid_app/examples/styles/app_styles.dart';
+import 'package:masjid_app/examples/utils/edit_masjid_name.dart';
 import 'package:masjid_app/examples/utils/open_maps_sheet.dart';
+import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
 import 'package:masjid_app/examples/widgets/edit_prayer_times_screen.dart';
 import 'package:masjid_app/examples/utils/analog_clock_builder.dart';
 import 'package:masjid_app/examples/widgets/prayer_time_table.dart';
+import 'package:toastification/toastification.dart';
 
 class ModalBodyView extends StatefulWidget {
   const ModalBodyView(
@@ -22,6 +26,17 @@ class ModalBodyView extends StatefulWidget {
 }
 
 class _ModalBodyViewState extends State<ModalBodyView> {
+  String currentName = '';
+  String currentId = '';
+  bool isDeleting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    currentName = widget.point.name;
+    currentId = widget.point.documentId;
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -50,18 +65,20 @@ class _ModalBodyViewState extends State<ModalBodyView> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       child: FloatingActionButton.small(
+                        elevation: 0,
                         onPressed: () async {
                           await openMapsSheet(context, widget.point.latitude,
                               widget.point.longitude, widget.point.name);
                         },
                         backgroundColor: AppStyles.backgroundColorGreen700,
                         foregroundColor: AppStyles.foregroundColorYellow,
-                        child: const Icon(Icons.location_on_outlined),
+                        child: const Icon(Icons.route),
                       ),
                     ),
                   ],
                 ),
               ),
+              const SizedBox(height: 4),
               for (var time in widget.prayerTimes)
                 Column(
                   children: [
@@ -91,30 +108,157 @@ class _ModalBodyViewState extends State<ModalBodyView> {
                         children: [
                           Visibility(
                             visible: currUser != null,
-                            child: OutlinedButton.icon(
-                              onPressed: () async {
-                                await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => EditPrayerTimesScreen(
-                                      point: widget.point,
-                                      prayerTimes: widget.prayerTimes,
-                                      onLocationLayerInit:
-                                          widget.onLocationLayerInit,
-                                    ),
+                            child: PopupMenuButton<void Function()>(
+                              color: AppStyles.backgroundColorGreen700,
+                              itemBuilder: (context) {
+                                return [
+                                  PopupMenuItem(
+                                      value: () async {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text("Tasdiqlash"),
+                                              content: const Text(
+                                                  "Haqiqatan ham bu masjidni oʻchirib tashlamoqchimisiz?"),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: const Text(
+                                                      "Bekor qilish"),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () async {
+                                                    showDialog(
+                                                      context: context,
+                                                      barrierDismissible: false,
+                                                      builder: (BuildContext
+                                                          context) {
+                                                        return const Center(
+                                                          child:
+                                                              CircularProgressIndicator(),
+                                                        );
+                                                      },
+                                                    );
+                                                    await deleteMasjid(widget
+                                                        .point.documentId);
+
+                                                    if (!context.mounted) {
+                                                      return;
+                                                    }
+                                                    Navigator.pop(context);
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child:
+                                                      const Text("Oʻchirish"),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
+                                      child: const Row(
+                                        children: [
+                                          Icon(
+                                            Icons.delete,
+                                            color:
+                                                AppStyles.foregroundColorYellow,
+                                          ),
+                                          SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text(
+                                            "Masjidni o'chirish",
+                                            style: TextStyle(
+                                                color: AppStyles
+                                                    .foregroundColorYellow),
+                                          )
+                                        ],
+                                      )),
+                                  PopupMenuItem(
+                                    value: () async {
+                                      await showModalBottomSheet(
+                                        isScrollControlled: true,
+                                        showDragHandle: true,
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return SingleChildScrollView(
+                                            child: Container(
+                                              padding: EdgeInsets.only(
+                                                bottom: MediaQuery.of(context)
+                                                    .viewInsets
+                                                    .bottom,
+                                              ),
+                                              child: EditModal(
+                                                currentName: currentName,
+                                                currentId: currentId,
+                                                onNameUpdated: (newName) {
+                                                  setState(() {
+                                                    widget.point.name = newName;
+                                                  });
+                                                },
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                    child: const Row(children: [
+                                      Icon(
+                                        Icons.edit,
+                                        color: AppStyles.foregroundColorYellow,
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      Text(
+                                        "Masjid nomini o'zgartirish",
+                                        style: TextStyle(
+                                            color: AppStyles
+                                                .foregroundColorYellow),
+                                      ),
+                                    ]),
                                   ),
-                                );
-                                if (!context.mounted) return;
-                                Navigator.pop(context);
+                                  PopupMenuItem(
+                                      value: () async {
+                                        await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                EditPrayerTimesScreen(
+                                              point: widget.point,
+                                              prayerTimes: widget.prayerTimes,
+                                              onLocationLayerInit:
+                                                  widget.onLocationLayerInit,
+                                            ),
+                                          ),
+                                        );
+                                        // if (!context.mounted) return;
+                                        // Navigator.pop(context);
+                                      },
+                                      child: const Row(
+                                        children: [
+                                          Icon(
+                                            Icons.access_time,
+                                            color:
+                                                AppStyles.foregroundColorYellow,
+                                          ),
+                                          SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text(
+                                            "Masjidni vaqtini yangilash",
+                                            style: TextStyle(
+                                                color: AppStyles
+                                                    .foregroundColorYellow),
+                                          )
+                                        ],
+                                      )),
+                                ];
                               },
-                              icon: Icon(
-                                Icons.edit_outlined,
-                                size: 15,
-                                color: AppStyles.backgroundColorGreen700,
-                              ),
-                              label: const Text(
-                                'Yangilash',
-                              ),
+                              onSelected: (fn) => fn(),
                             ),
                           ),
                           Column(
@@ -140,6 +284,43 @@ class _ModalBodyViewState extends State<ModalBodyView> {
         ),
       ),
     );
+  }
+
+  Future<void> deleteMasjid(String masjidId) async {
+    try {
+      // Step 1: Delete prayer documents associated with the masjid
+      await FirebaseFirestore.instance
+          .collection('prayer_time')
+          .where('masjid',
+              isEqualTo: FirebaseFirestore.instance
+                  .collection('masjids')
+                  .doc(masjidId))
+          .get()
+          .then((querySnapshot) {
+        for (var prayerDoc in querySnapshot.docs) {
+          prayerDoc.reference.delete();
+        }
+      });
+
+      // Step 2: Delete the masjid document
+      await FirebaseFirestore.instance
+          .collection('masjids')
+          .doc(masjidId)
+          .delete();
+
+      if (!context.mounted) return;
+      showAlertDialog(
+          context,
+          title: "🕌",
+          "Siz ushbu masjidni o'chirib tashladingiz...",
+          toastType: ToastificationType.success,
+          toastAlignment: Alignment.topCenter,
+          margin: const EdgeInsets.only(top: 28.0));
+      Navigator.pop(context);
+      widget.onLocationLayerInit();
+    } catch (e) {
+      debugPrint('Error deleting masjid and prayer documents: $e');
+    }
   }
 
   TextStyle myTextStyle = const TextStyle(fontSize: 15);
