@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:masjid_app/examples/data/provider.dart';
 import 'package:masjid_app/examples/map_screen.dart';
 import 'package:masjid_app/examples/styles/app_styles.dart';
 import 'package:masjid_app/examples/user_layer_page.dart';
@@ -19,31 +20,36 @@ import 'package:masjid_app/examples/clusterized_placemark_collection_page.dart';
 import 'package:masjid_app/examples/views/home_view.dart';
 import 'package:masjid_app/examples/views/settings_view.dart';
 import 'package:masjid_app/examples/widgets/close_masjid_prayer_times.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await UserData.init();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
+  final userData = UserData();
+  final notifier = await userData.initializeNotifier();
   // SharedPreferences prefs = await SharedPreferences.getInstance();
   // bool onboardingShown = prefs.getBool('onboardingShown') ?? false;
 
-  runApp(MaterialApp(
-      home: const MainPage(),
-      theme: ThemeData(
-          colorScheme: const ColorScheme.light()
-              .copyWith(primary: AppStyles.backgroundColorGreen700)),
-      debugShowCheckedModeBanner: false,
-      routes: {
-        './main/': (context) => const MainPage(),
-        './login/': (context) => const LoginView(),
-        './map-screen/': (context) => const MapScreen(),
-        './search-masjids/': (context) => const SearchMasjids(),
-        './home-view/': (context) => const HomeView(),
-        './close-masjid/': (context) => const CloseMasjidPrayerTimes(),
-        './news-view/': (context) => const NewsView(),
-      }));
+  runApp(ChangeNotifierProvider(
+    create: (context) => notifier,
+    child: MaterialApp(
+        home: const MainPage(),
+        theme: ThemeData(
+            colorScheme: const ColorScheme.light()
+                .copyWith(primary: AppStyles.backgroundColorGreen700)),
+        debugShowCheckedModeBanner: false,
+        routes: {
+          './main/': (context) => const MainPage(),
+          './login/': (context) => const LoginView(),
+          './map-screen/': (context) => const MapScreen(),
+          './search-masjids/': (context) => const SearchMasjids(),
+          './home-view/': (context) => const HomeView(),
+          './close-masjid/': (context) => const CloseMasjidPrayerTimes(),
+          './news-view/': (context) => const NewsView(),
+        }),
+  ));
 }
 
 class MainPage extends StatefulWidget {

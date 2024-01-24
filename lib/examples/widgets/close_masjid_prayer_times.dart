@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:map_launcher/map_launcher.dart';
+import 'package:masjid_app/examples/data/provider.dart';
 import 'package:masjid_app/examples/map_point.dart';
 import 'package:masjid_app/examples/styles/app_styles.dart';
 import 'package:masjid_app/examples/utils/analog_clock_builder.dart';
@@ -16,6 +17,7 @@ import 'package:masjid_app/examples/widgets/prayer_time_table.dart';
 import 'package:app_settings/app_settings.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 
 class CloseMasjidPrayerTimes extends StatefulWidget {
   const CloseMasjidPrayerTimes({super.key});
@@ -169,6 +171,7 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
         const TextStyle(color: AppStyles.foregroundColorYellow);
     double screenWidth = MediaQuery.of(context).size.width;
     double dynamicFontSize = screenWidth * 0.04;
+    var notifier = Provider.of<NotificationCountNotifier>(context);
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -178,9 +181,11 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
                   onPressed: () {
                     //open end drower here
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const NewsView()));
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => NewsView(notifier: notifier),
+                      ),
+                    );
                   },
                   icon: Icon(
                     Icons.notifications,
@@ -189,24 +194,26 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
               Positioned(
                 right: 10,
                 top: 10,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    color: AppStyles.foregroundColorRed,
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 5,
-                    minHeight: 5,
-                  ),
-                  child: const Text(
-                    '5',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                    ),
-                  ),
-                ),
+                child: notifier.notificationCount > 0
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          color: AppStyles.foregroundColorRed,
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 5,
+                          minHeight: 5,
+                        ),
+                        child: Text(
+                          '${notifier.notificationCount}',
+                          style: const TextStyle(
+                            color: AppStyles.backgroundColorWhite,
+                            fontSize: 10,
+                          ),
+                        ),
+                      )
+                    : Container(),
               ),
             ]);
           })
