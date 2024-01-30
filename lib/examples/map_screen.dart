@@ -176,7 +176,7 @@ class _MapScreenState extends State<MapScreen> {
             : FittedBox(
                 child: mapTapped
                     ? const Text('Xaritadan manzilni tanlang')
-                    : const Text('MasjidGo')),
+                    : const Text('MasjidGoo')),
         actions: [
           currUser != null && isSearchMode == false
               ? IconButton(
