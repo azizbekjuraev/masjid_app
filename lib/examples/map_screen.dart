@@ -201,9 +201,14 @@ class _MapScreenState extends State<MapScreen> {
                 : const Icon(Icons.search),
             onPressed: () {
               setState(() {
-                isSearchMode = !isSearchMode;
-                if (searchController.text.isNotEmpty) {
-                  searchController.text = '';
+                if (isSearchMode) {
+                  if (searchController.text.isNotEmpty) {
+                    searchController.text = '';
+                  } else {
+                    isSearchMode = false;
+                  }
+                } else {
+                  isSearchMode = true;
                 }
               });
             },
@@ -415,7 +420,6 @@ class _MapScreenState extends State<MapScreen> {
       CameraUpdate.newCameraPosition(CameraPosition(target: point)),
     );
     setState(() {
-      isSearchMode = false;
       isTyping = false;
     });
     await _initLocationLayer();
