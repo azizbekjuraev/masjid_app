@@ -98,14 +98,7 @@ class _DrawerWidgetsState extends State<DrawerWidgets> {
               leading: const Icon(Icons.login),
               title: const Text('Tizimga kirish'),
               onTap: () {
-                internetConnection.then((value) {
-                  if (value) {
-                    Navigator.pushNamed(context, './login/')
-                        .then((value) => Navigator.of(context).pop());
-                  } else {
-                    // Handle no internet connection
-                  }
-                });
+                Navigator.pushNamed(context, './login/');
               },
             ),
           if (currUser.isNotEmpty)

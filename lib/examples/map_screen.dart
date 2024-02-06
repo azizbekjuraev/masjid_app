@@ -34,26 +34,28 @@ class _MapScreenState extends State<MapScreen> {
 
   var collection = FirebaseFirestore.instance.collection('masjids');
   var prayerCollection = FirebaseFirestore.instance.collection('prayer_time');
-  dynamic initialPosition;
   late List<MapPoint> items = [];
   late List<Map<String, dynamic>> prayerItems = [];
   List<MapPoint> originalItems = [];
+  List<MapObject> mapObject = [];
+  Point? newMasjidPoint;
   bool isLoaded = false;
   bool isSearchMode = false;
   bool isNightModeAnabled = false;
   bool mapTapped = false;
+  bool isTyping = false;
+  bool isNotFound = false;
   int? _currentOpenModalIndex;
-  List<MapObject> mapObject = [];
-  Point? newMasjidPoint;
+  dynamic initialPosition;
 
   final animation =
       const MapAnimation(type: MapAnimationType.smooth, duration: 2.0);
 
   @override
   void initState() {
-    super.initState();
     searchController = TextEditingController();
     _initLocationLayer();
+    super.initState();
   }
 
   @override
@@ -65,11 +67,12 @@ class _MapScreenState extends State<MapScreen> {
   List<MapPoint> getFilteredItems(String searchText) {
     if (searchText.isEmpty) {
       return originalItems;
+    } else {
+      return originalItems
+          .where((item) =>
+              item.name.toLowerCase().contains(searchText.toLowerCase()))
+          .toList();
     }
-    return originalItems
-        .where((item) =>
-            item.name.toLowerCase().contains(searchText.toLowerCase()))
-        .toList();
   }
 
   Future<void> _initLocationLayer() async {
@@ -163,11 +166,14 @@ class _MapScreenState extends State<MapScreen> {
                 onChanged: (text) {
                   setState(() {
                     items = getFilteredItems(text);
+                    isTyping = true;
+                    isNotFound = items.isEmpty ? true : false;
                   });
                 },
                 controller: searchController,
                 autofocus: true,
                 decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.search),
                     hintText: 'Qidirmoq...',
                     border: InputBorder.none,
                     hintStyle: TextStyle(color: Colors.black12)),
@@ -176,7 +182,7 @@ class _MapScreenState extends State<MapScreen> {
             : FittedBox(
                 child: mapTapped
                     ? const Text('Xaritadan manzilni tanlang')
-                    : const Text('MasjidGoo')),
+                    : const Text('MasjidGo')),
         actions: [
           currUser != null && isSearchMode == false
               ? IconButton(
@@ -196,7 +202,9 @@ class _MapScreenState extends State<MapScreen> {
             onPressed: () {
               setState(() {
                 isSearchMode = !isSearchMode;
-                searchController.text = '';
+                if (searchController.text.isNotEmpty) {
+                  searchController.text = '';
+                }
               });
             },
           ),
@@ -359,28 +367,42 @@ class _MapScreenState extends State<MapScreen> {
               child: Container(color: Colors.transparent),
             ),
           ),
-          isSearchMode
+          isTyping && searchController.text.isNotEmpty
               ? Positioned(
                   top: 0,
                   width: MediaQuery.of(context).size.width,
                   height: listViewHeight,
-                  child: Container(
-                    color: AppStyles.backgroundColorWhite,
-                    child: ListView.builder(
-                      itemCount: items.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                            horizontalTitleGap: 3.0,
-                            title: Text(items[index].name),
-                            leading: const Icon(
-                              Icons.location_on_sharp,
-                              size: 32,
-                            ),
-                            onTap: () => cameraMover(
-                                items[index].latitude, items[index].longitude));
-                      },
-                    ),
-                  ))
+                  child: isNotFound
+                      ? Container(
+                          color: AppStyles.backgroundColorWhite,
+                          child: const Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Bunday masjid mavjud emas!',
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        )
+                      : Container(
+                          color: AppStyles.backgroundColorWhite,
+                          child: ListView.builder(
+                            itemCount: items.length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                  horizontalTitleGap: 3.0,
+                                  title: Text(items[index].name),
+                                  leading: const Icon(
+                                    Icons.location_on_sharp,
+                                    size: 32,
+                                  ),
+                                  onTap: () => cameraMover(
+                                      items[index].latitude,
+                                      items[index].longitude));
+                            },
+                          ),
+                        ))
               : Container(),
         ],
       ),
@@ -389,14 +411,13 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> cameraMover(double latitude, double longitude) async {
     final Point point = Point(latitude: latitude, longitude: longitude);
-    await _mapController
-        .moveCamera(
-          CameraUpdate.newCameraPosition(CameraPosition(target: point)),
-        )
-        .then((value) => setState(() {
-              isSearchMode = !isSearchMode;
-            }));
-    //buni hali korib chiqaman!
+    await _mapController.moveCamera(
+      CameraUpdate.newCameraPosition(CameraPosition(target: point)),
+    );
+    setState(() {
+      isSearchMode = false;
+      isTyping = false;
+    });
     await _initLocationLayer();
   }
 

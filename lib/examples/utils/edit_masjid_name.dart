@@ -60,7 +60,7 @@ class _EditModalState extends State<EditModal> {
             'assets/mosque.png',
             width: 200,
             height: 200,
-            fit: BoxFit.fill, // or BoxFit.contain, BoxFit.cover, etc.
+            fit: BoxFit.fill,
           ),
           const SizedBox(
             height: 25,
