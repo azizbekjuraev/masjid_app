@@ -4,14 +4,12 @@ import 'package:masjid_app/examples/data/user_data.dart';
 import 'package:masjid_app/examples/styles/app_styles.dart';
 import 'package:masjid_app/examples/utils/get_prayer_times.dart';
 import 'package:masjid_app/examples/utils/getter_functions.dart';
-import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
 // ignore: unused_import
 import 'package:masjid_app/examples/utils/upload_masjids_to_firestore.dart';
 // ignore: unused_import
 import 'package:masjid_app/examples/utils/upload_prayer_times_to_firestore.dart';
 import 'package:masjid_app/examples/views/add_masjid_view.dart';
 import 'package:masjid_app/examples/widgets/modal_body_view.dart';
-import 'package:toastification/toastification.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 import 'package:masjid_app/examples/map_point.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -226,7 +224,6 @@ class _MapScreenState extends State<MapScreen> {
               _mapController = controller;
               // await uploadMasjidsToFirestore();
               // await uploadPrayerTimesToFirestore();
-
               await _mapController
                   .moveCamera(
                     CameraUpdate.newCameraPosition(

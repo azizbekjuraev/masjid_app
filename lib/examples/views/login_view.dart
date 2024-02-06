@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:masjid_app/examples/data/user_data.dart';
 import 'package:masjid_app/examples/utils/show_alert_dialog.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:masjid_app/examples/widgets/drawer_widget.dart';
-import 'package:provider/provider.dart';
+
 import 'package:toastification/toastification.dart';
 
 class LoginView extends StatefulWidget {
