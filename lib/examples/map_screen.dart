@@ -9,6 +9,7 @@ import 'package:masjid_app/examples/utils/upload_masjids_to_firestore.dart';
 // ignore: unused_import
 import 'package:masjid_app/examples/utils/upload_prayer_times_to_firestore.dart';
 import 'package:masjid_app/examples/views/add_masjid_view.dart';
+import 'package:masjid_app/examples/widgets/clusterized_icon_painter.dart';
 import 'package:masjid_app/examples/widgets/modal_body_view.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 import 'package:masjid_app/examples/map_point.dart';
@@ -29,6 +30,7 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   late final YandexMapController _mapController;
   late TextEditingController searchController;
+  var _mapZoom = 0.0;
 
   var collection = FirebaseFirestore.instance.collection('masjids');
   var prayerCollection = FirebaseFirestore.instance.collection('prayer_time');
@@ -94,6 +96,44 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> onLocationLayerInit() async {
     await _initLocationLayer();
+  }
+
+  /// Метод для получения коллекции кластеризованных маркеров
+  ClusterizedPlacemarkCollection _getClusterizedCollection({
+    required List<PlacemarkMapObject> placemarks,
+  }) {
+    return ClusterizedPlacemarkCollection(
+        mapId: const MapObjectId('clusterized-1'),
+        placemarks: placemarks,
+        radius: 50,
+        minZoom: 15,
+        onClusterAdded: (self, cluster) async {
+          return cluster.copyWith(
+            appearance: cluster.appearance.copyWith(
+              opacity: 1.0,
+              icon: PlacemarkIcon.single(
+                PlacemarkIconStyle(
+                  image: BitmapDescriptor.fromBytes(
+                    await ClusterIconPainter(cluster.size)
+                        .getClusterIconBytes(),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+        onClusterTap: (self, cluster) async {
+          await _mapController.moveCamera(
+            animation: const MapAnimation(
+                type: MapAnimationType.linear, duration: 0.3),
+            CameraUpdate.newCameraPosition(
+              CameraPosition(
+                target: cluster.placemarks.first.point,
+                zoom: _mapZoom + 1,
+              ),
+            ),
+          );
+        });
   }
 
   List<PlacemarkMapObject> _getPlacemarkObjects(BuildContext context) {
@@ -237,8 +277,18 @@ class _MapScreenState extends State<MapScreen> {
                   .then((value) async => await _initLocationLayer());
               // await _initLocationLayer();
             },
+            onCameraPositionChanged: (cameraPosition, _, __) {
+              setState(() {
+                _mapZoom = cameraPosition.zoom;
+              });
+            },
             nightModeEnabled: isNightModeAnabled,
             mapObjects: mapTapped ? mapObject : _getPlacemarkObjects(context),
+            // mapObjects: [
+            //   _getClusterizedCollection(
+            //     placemarks: _getPlacemarkObjects(context),
+            //   ),
+            // ],
             onUserLocationAdded: (view) async {
               return view.copyWith(
                   pin: view.pin.copyWith(
