@@ -68,6 +68,7 @@ class _LoginViewState extends State<LoginView> {
           margin: const EdgeInsets.only(bottom: 35.0));
 
       Navigator.pop(context);
+      Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       // Handle specific FirebaseAuthExceptions
       if (e.code == 'too-many-requests') {

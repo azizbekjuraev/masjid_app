@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:masjid_app/examples/styles/app_styles.dart';
 
 /// Класс для отрисовки кластеров на карте
 class ClusterIconPainter {
@@ -48,12 +49,12 @@ Canvas _paintCirclePlacemark({
 
   // внутренний круг - закрашенная часть маркера
   final fillPaint = Paint()
-    ..color = Colors.yellow
+    ..color = AppStyles.backgroundColorGreen700
     ..style = PaintingStyle.fill;
 
   // внешний круг - обводка маркера
   final strokePaint = Paint()
-    ..color = Colors.deepOrangeAccent
+    ..color = AppStyles.foregroundColorYellow
     ..style = PaintingStyle.stroke
     ..strokeWidth = 8;
 
@@ -77,7 +78,7 @@ void _paintTextCountPlacemarks({
     text: TextSpan(
       text: text,
       style: const TextStyle(
-        color: Colors.deepOrangeAccent,
+        color: AppStyles.foregroundColorYellow,
         fontSize: 50,
         fontWeight: FontWeight.w800,
       ),

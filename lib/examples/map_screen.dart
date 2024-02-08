@@ -98,7 +98,6 @@ class _MapScreenState extends State<MapScreen> {
     await _initLocationLayer();
   }
 
-  /// Метод для получения коллекции кластеризованных маркеров
   ClusterizedPlacemarkCollection _getClusterizedCollection({
     required List<PlacemarkMapObject> placemarks,
   }) {
@@ -283,12 +282,14 @@ class _MapScreenState extends State<MapScreen> {
               });
             },
             nightModeEnabled: isNightModeAnabled,
-            mapObjects: mapTapped ? mapObject : _getPlacemarkObjects(context),
-            // mapObjects: [
-            //   _getClusterizedCollection(
-            //     placemarks: _getPlacemarkObjects(context),
-            //   ),
-            // ],
+            // mapObjects: mapTapped ? mapObject : _getPlacemarkObjects(context),
+            mapObjects: mapTapped
+                ? mapObject
+                : [
+                    _getClusterizedCollection(
+                      placemarks: _getPlacemarkObjects(context),
+                    ),
+                  ],
             onUserLocationAdded: (view) async {
               return view.copyWith(
                   pin: view.pin.copyWith(
@@ -468,6 +469,7 @@ class _MapScreenState extends State<MapScreen> {
     );
     setState(() {
       isTyping = false;
+      isSearchMode = false;
     });
     await _initLocationLayer();
   }
