@@ -47,8 +47,13 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
   }
 
   Future<void> fetchData() async {
-    PermissionStatus status = await Permission.locationWhenInUse.status;
-    if (status.isGranted) {
+    // PermissionStatus status = await Permission.locationWhenInUse.status;
+    // if (status.isGranted) {
+
+    final locationPermissionIsGranted =
+        await Permission.location.request().isGranted;
+
+    if (locationPermissionIsGranted) {
       try {
         var data = await collection.get();
         var prayerData = await prayerCollection.get();
@@ -66,18 +71,28 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
         if (!context.mounted) return;
         debugPrint("$e");
       }
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No access to user location'),
+          ),
+        );
+      });
     }
-    if (status.isDenied) {
-      // Request permission
-      status = await Permission.locationWhenInUse.request();
-      if (status.isDenied) {
-        // Handle denied permission
-        openAppSettings();
-      } else {
-        // Permission granted, fetch data again and reset the navigation
-        _dataFetching = fetchData();
-      }
-    }
+
+    // }
+    // if (status.isDenied) {
+    //   // Request permission
+    //   status = await Permission.locationWhenInUse.request();
+    //   if (status.isDenied) {
+    //     // Handle denied permission
+    //     openAppSettings();
+    //   } else {
+    //     // Permission granted, fetch data again and reset the navigation
+    //     _dataFetching = fetchData();
+    //   }
+    // }
   }
 
   Future<void> getCurrentLocation() async {
@@ -291,8 +306,8 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
                       )
                     : const Center(
                         heightFactor: 10,
-                        child: CircularProgressIndicator(
-                          color: AppStyles.foregroundColorYellow,
+                        child: CircularProgressIndicator.adaptive(
+                          backgroundColor: AppStyles.foregroundColorYellow,
                         ),
                       ),
               ),

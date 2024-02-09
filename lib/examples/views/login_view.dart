@@ -174,7 +174,7 @@ class _LoginViewState extends State<LoginView> {
                         await _signInWithEmailAndPassword();
                       },
                       child: isLoading
-                          ? const CircularProgressIndicator()
+                          ? const CircularProgressIndicator.adaptive()
                           : const Text('Kirish'),
                     ),
                   ],

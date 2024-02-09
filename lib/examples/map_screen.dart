@@ -45,6 +45,7 @@ class _MapScreenState extends State<MapScreen> {
   bool mapTapped = false;
   bool isTyping = false;
   bool isNotFound = false;
+  bool isMapLoading = false;
   int? _currentOpenModalIndex;
   dynamic initialPosition;
 
@@ -53,6 +54,7 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   void initState() {
+    isMapLoading = true;
     searchController = TextEditingController();
     _initLocationLayer();
     super.initState();
@@ -87,10 +89,10 @@ class _MapScreenState extends State<MapScreen> {
         prayerItems = prayerTimes;
         isLoaded = true;
       });
-      await getCurrentLocation();
+      // await getCurrentLocation();
     } catch (e) {
       if (!context.mounted) return;
-      debugPrint("$e");
+      debugPrint("check this error $e");
     }
   }
 
@@ -183,10 +185,12 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> getCurrentLocation() async {
-    Position position = await Geolocator.getCurrentPosition(
+    Position? position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
-    initialPosition =
-        Point(latitude: position.latitude, longitude: position.longitude);
+    setState(() {
+      initialPosition =
+          Point(latitude: position.latitude, longitude: position.longitude);
+    });
   }
 
   @override
@@ -260,21 +264,29 @@ class _MapScreenState extends State<MapScreen> {
               _initLocationLayer();
             },
             onMapCreated: (controller) async {
+              await getCurrentLocation();
               _mapController = controller;
               // await uploadMasjidsToFirestore();
               // await uploadPrayerTimesToFirestore();
-              await _mapController
-                  .moveCamera(
-                    CameraUpdate.newCameraPosition(
-                      CameraPosition(
-                        target: initialPosition,
-                        zoom: 13,
+              await _mapController.moveCamera(
+                initialPosition != null
+                    ? CameraUpdate.newCameraPosition(
+                        CameraPosition(
+                          target: initialPosition,
+                          zoom: 13,
+                        ),
+                      )
+                    : CameraUpdate.newCameraPosition(
+                        const CameraPosition(
+                          target: Point(latitude: 41.2995, longitude: 69.2401),
+                          zoom: 13,
+                        ),
                       ),
-                    ),
-                    animation: const MapAnimation(),
-                  )
-                  .then((value) async => await _initLocationLayer());
-              // await _initLocationLayer();
+                animation: const MapAnimation(),
+              );
+              setState(() {
+                isMapLoading = false;
+              });
             },
             onCameraPositionChanged: (cameraPosition, _, __) {
               setState(() {
@@ -387,21 +399,21 @@ class _MapScreenState extends State<MapScreen> {
                     animation: const MapAnimation(
                         type: MapAnimationType.linear, duration: 0.6));
 
-                final locationPermissionIsGranted =
-                    await Permission.location.request().isGranted;
+                // final locationPermissionIsGranted =
+                //     await Permission.location.request().isGranted;
 
-                if (locationPermissionIsGranted) {
-                  await _mapController.toggleUserLayer(
-                      visible: true, autoZoomEnabled: true);
-                } else {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('No access to user location'),
-                      ),
-                    );
-                  });
-                }
+                // if (locationPermissionIsGranted) {
+                //   await _mapController.toggleUserLayer(
+                //       visible: true, autoZoomEnabled: true);
+                // } else {
+                //   WidgetsBinding.instance.addPostFrameCallback((_) {
+                //     ScaffoldMessenger.of(context).showSnackBar(
+                //       const SnackBar(
+                //         content: Text('No access to user location'),
+                //       ),
+                //     );
+                //   });
+                // }
               },
               backgroundColor: AppStyles.backgroundColorGreen700,
               foregroundColor: AppStyles.foregroundColorYellow,
@@ -456,6 +468,12 @@ class _MapScreenState extends State<MapScreen> {
                             },
                           ),
                         ))
+              : Container(),
+          isMapLoading
+              ? const Positioned.fill(
+                  child: Center(
+                  child: CircularProgressIndicator.adaptive(),
+                ))
               : Container(),
         ],
       ),

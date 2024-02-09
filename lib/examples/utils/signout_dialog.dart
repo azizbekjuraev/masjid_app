@@ -29,7 +29,7 @@ void showSignOutConfirmationDialog(BuildContext context) {
                   barrierDismissible: false,
                   builder: (BuildContext context) {
                     return const Center(
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator.adaptive(),
                     );
                   },
                 );

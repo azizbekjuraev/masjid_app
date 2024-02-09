@@ -138,7 +138,8 @@ class _ModalBodyViewState extends State<ModalBodyView> {
                                                           context) {
                                                         return const Center(
                                                           child:
-                                                              CircularProgressIndicator(),
+                                                              CircularProgressIndicator
+                                                                  .adaptive(),
                                                         );
                                                       },
                                                     );

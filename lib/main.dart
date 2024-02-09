@@ -5,6 +5,7 @@ import 'package:masjid_app/examples/styles/app_styles.dart';
 import 'package:masjid_app/examples/map_controls_page.dart';
 import 'package:masjid_app/examples/user_layer_page.dart';
 import 'package:masjid_app/examples/views/news_view.dart';
+import 'package:masjid_app/examples/views/settings_view.dart';
 import 'package:masjid_app/firebase_options.dart';
 // import 'package:masjid_app/examples/widgets/drawer_widget.dart';
 import 'package:masjid_app/examples/views/login_view.dart';
@@ -57,7 +58,7 @@ class _MainPageState extends State<MainPage> {
     // HomeView(),
     CloseMasjidPrayerTimes(),
     MapScreen(),
-    UserLayerPage(),
+    SettingsView(),
   ];
 
   @override

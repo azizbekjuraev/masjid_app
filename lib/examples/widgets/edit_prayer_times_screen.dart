@@ -91,7 +91,7 @@ class EditPrayerTimesScreenState extends State<EditPrayerTimesScreen> {
                     context: context,
                     builder: (BuildContext context) {
                       return const Center(
-                        child: CircularProgressIndicator(),
+                        child: CircularProgressIndicator.adaptive(),
                       );
                     },
                     barrierDismissible: false,
