@@ -45,7 +45,7 @@ dependencies:
   provider: ^6.1.1
   shared_preferences: ^2.2.2
   url_launcher: ^6.2.1
-  yandex_mapkit: ^3.3.3
+  yandex_mapkit: ^3.4.0
   toastification: ^1.1.0
   flutter_launcher_icons: ^0.13.1
   http: ^1.1.2
