@@ -47,11 +47,10 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
   }
 
   Future<void> fetchData() async {
-    // PermissionStatus status = await Permission.locationWhenInUse.status;
-    // if (status.isGranted) {
-
     final locationPermissionIsGranted =
         await Permission.location.request().isGranted;
+
+    print(locationPermissionIsGranted);
 
     if (locationPermissionIsGranted) {
       try {
@@ -71,6 +70,8 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
         if (!context.mounted) return;
         debugPrint("$e");
       }
+    } else if (locationPermissionIsGranted == false) {
+      openAppSettings();
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -80,19 +81,6 @@ class _MyWidgetState extends State<CloseMasjidPrayerTimes> {
         );
       });
     }
-
-    // }
-    // if (status.isDenied) {
-    //   // Request permission
-    //   status = await Permission.locationWhenInUse.request();
-    //   if (status.isDenied) {
-    //     // Handle denied permission
-    //     openAppSettings();
-    //   } else {
-    //     // Permission granted, fetch data again and reset the navigation
-    //     _dataFetching = fetchData();
-    //   }
-    // }
   }
 
   Future<void> getCurrentLocation() async {
