@@ -30,6 +30,12 @@ void main() async {
     child: MaterialApp(
         home: const MainPage(),
         theme: ThemeData(
+            // textTheme: GoogleFonts.robotoTextTheme().copyWith(
+            //   bodyLarge:
+            //       GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.w400),
+            //   bodyMedium:
+            //       GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.w400),
+            // ),
             colorScheme: const ColorScheme.light()
                 .copyWith(primary: AppStyles.backgroundColorGreen700)),
         debugShowCheckedModeBanner: false,

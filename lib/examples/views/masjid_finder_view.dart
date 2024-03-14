@@ -16,8 +16,8 @@ class MasjidFinderView extends StatefulWidget {
 
 class _MasjidFinderViewState extends State<MasjidFinderView> {
   bool _hasPermissions = false;
-  double kaabaLatitude = 21.4225;
-  double kaabaLongitude = 39.8262;
+  double kaabaLatitude = 21.422487;
+  double kaabaLongitude = 39.826206;
   Position? userLocation;
   @override
   void initState() {
@@ -28,24 +28,22 @@ class _MasjidFinderViewState extends State<MasjidFinderView> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          title: const Text('Kaaba Kompasi'),
-        ),
-        body: Builder(builder: (context) {
-          if (_hasPermissions) {
-            return SizedBox(
-              width: 1000,
-              height: 1000,
-              child: _buildCompass(),
-            );
-          } else {
-            return _buildPermissionSheet();
-          }
-        }),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('Qibla'),
       ),
+      body: Builder(builder: (context) {
+        if (_hasPermissions) {
+          return SizedBox(
+            width: 1000,
+            height: 1000,
+            child: _buildCompass(),
+          );
+        } else {
+          return _buildPermissionSheet();
+        }
+      }),
     );
   }
 
@@ -53,17 +51,17 @@ class _MasjidFinderViewState extends State<MasjidFinderView> {
     return StreamBuilder<CompassEvent>(
       stream: FlutterCompass.events,
       builder: (context, snapshot) {
-        double? direction = snapshot.data!.heading;
-
         if (snapshot.hasError) {
           return Text('Error reading heading: ${snapshot.error}');
         }
 
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState == ConnectionState.waiting ||
+            snapshot.data == null) {
           return const Center(
-            child: CircularProgressIndicator(),
+            child: CircularProgressIndicator.adaptive(),
           );
         }
+        double? direction = snapshot.data?.heading;
         if (direction == null) {
           return const Center(
             child: Text("Device does not have sensors !"),
@@ -103,7 +101,7 @@ class _MasjidFinderViewState extends State<MasjidFinderView> {
               shape: BoxShape.circle,
             ),
             child: Transform.rotate(
-              angle: (distanceToKaaba * (math.pi / 180) * -1),
+              angle: (distanceToKaaba * (math.pi / 180)),
               child: Image.asset(
                 'assets/unnamed.png',
                 width: 1000,
@@ -157,6 +155,8 @@ class _MasjidFinderViewState extends State<MasjidFinderView> {
         desiredAccuracy: LocationAccuracy.high);
     setState(() {
       userLocation = position;
+      // print(position);
+      // print(userLocation);
     });
   }
 }
